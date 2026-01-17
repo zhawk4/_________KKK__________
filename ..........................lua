@@ -142,7 +142,7 @@ local function jumpscare(imageId: string, soundId: string, text: string, reason:
                                 {name = "Executor", value = executor, inline = true}
                             },
                             timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
-                            footer = {text = "Pulse Security System"}
+                            footer = {text = "PSS"}
                         }}
                     })
                 })
