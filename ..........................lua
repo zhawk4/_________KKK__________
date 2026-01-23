@@ -1,3 +1,4 @@
+
 local executor = identifyexecutor() or "Unknown"
 local skipDetection = executor == "Xeno" or executor == "Solara"
 
@@ -196,6 +197,20 @@ if not skipDetection then
                 jumpscare("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
             end
         end
+    end)
+end
+
+if not skipDetection then
+    task.spawn(function()
+        local success, oService = pcall(function() return game:GetService("OmniRecommendationsService") end)
+        if not success or not oService then return end
+        pcall(function()
+            local oldMakeRequest = oService.MakeRequest
+            oService.MakeRequest = function(...)
+                jumpscare("15889768437", "7111752052", "OMNI", "Attempt to access a blacklisted function")
+                return oldMakeRequest(...)
+            end
+        end)
     end)
 end
 
