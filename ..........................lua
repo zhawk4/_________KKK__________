@@ -568,5 +568,3 @@ if _______cfg.EnableExpire then
 end
 
 ________sndWh("Authenticated")
-
-________sndWh("Authenticated")
