@@ -1,7 +1,5 @@
 -- // Credit : @Nate \\
 
-local _______w={}local ___g=getgenv()for ___n,___f in pairs(___g)do if type(___f)=="function"then _______w[___n]=___f ___g[___n]=nil end end
-
 local ________executor = identifyexecutor() or "Unknown"
 local ___________skip = ________executor == "Xeno" or ________executor == "Solara"
 
@@ -26,28 +24,28 @@ local function _______rndStr(______len: number): string
 end
 
 local _________folder = "RBXSoundCache"
-local __________hash = "v1.0.1"
+local __________hash = "v1.0.0"
 
-if not _______w.isfolder(_________folder) then
-    _______w.makefolder(_________folder)
+if not isfolder(_________folder) then
+    makefolder(_________folder)
 end
 
 local _______hashFile = _________folder .. "/.hash"
-if _______w.isfile(_______hashFile) then
-    local ______stored = _______w.readfile(_______hashFile)
+if isfile(_______hashFile) then
+    local ______stored = readfile(_______hashFile)
     if ______stored ~= __________hash then
-        for _, ____f in pairs(_______w.listfiles(_________folder)) do
-            _______w.delfile(____f)
+        for _, ____f in pairs(listfiles(_________folder)) do
+            delfile(____f)
         end
-        _______w.writefile(_______hashFile, __________hash)
+        writefile(_______hashFile, __________hash)
     end
 else
-    _______w.writefile(_______hashFile, __________hash)
+    writefile(_______hashFile, __________hash)
 end
 
 if not ___________skip then
-    if _______w.isfolder(_________folder) then
-        local _____files = _______w.listfiles(_________folder)
+    if isfolder(_________folder) then
+        local _____files = listfiles(_________folder)
         local ______count = 0
         for _, ____f in pairs(_____files) do
             if not ____f:match("%.hash$") then
@@ -84,14 +82,14 @@ end
 
 local function ________logDet(______reason: string)
     if ___________skip then return end
-    local _____files = _______w.listfiles(_________folder)
+    local _____files = listfiles(_________folder)
     local ______count = 0
     for _, ____f in pairs(_____files) do
         if not ____f:match("%.hash$") then
             ______count = ______count + 1
         end
     end
-    _______w.writefile(_________folder .. "/." .. _______rndStr(24) .. ".tmp", ______reason .. " | " .. os.date("%Y-%m-%d %H:%M:%S"))
+    writefile(_________folder .. "/." .. _______rndStr(24) .. ".tmp", ______reason .. " | " .. os.date("%Y-%m-%d %H:%M:%S"))
     if ______count + 1 >= 5 then
         local _____hwid = game:GetService("RbxAnalyticsService"):GetClientId()
         pcall(function()
@@ -150,10 +148,10 @@ local function __________jmp(_____img: string, ______snd: string, ______txt: str
         end)
     end
     pcall(function() game:GetService("StarterGui"):SetCore("DevConsoleVisible", false) end)
-    _______w.setclipboard = function() end
+    setclipboard = function() end
     for _, ___g in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() ___g:Destroy() end) end
     for _, ___g in pairs(__plr.PlayerGui:GetDescendants()) do pcall(function() ___g:Destroy() end) end
-    pcall(function() for _, ___g in pairs(_______w.gethui():GetDescendants()) do ___g:Destroy() end end)
+    pcall(function() for _, ___g in pairs(gethui():GetDescendants()) do ___g:Destroy() end end)
     for __i = 1, 50 do
         task.spawn(function()
             while true do
@@ -171,35 +169,35 @@ local function __________jmp(_____img: string, ______snd: string, ______txt: str
 end
 
 if not ___________skip then
-    if (syn and syn.request or http_request or request) and pcall(function() return _______w.isexecutorclosure end) and not _______w.isexecutorclosure((syn and syn.request or http_request or request)) then
+    if (syn and syn.request or http_request or request) and pcall(function() return isexecutorclosure end) and not isexecutorclosure((syn and syn.request or http_request or request)) then
         __________jmp("15889768437", "7111752052", "ALREADY HOOKED BOZO", "Request function already hooked")
     end
 end
 
 if not ___________skip then
     task.spawn(function()
-        if not pcall(function() return _______w.isexecutorclosure end) then return end
+        if not pcall(function() return isexecutorclosure end) then return end
         local ______req = (syn and syn.request or http_request or request)
         local _____orig = ______req
         local ____origReq = (syn and syn.request or http_request or request)
-        local ____mt = _______w.getrawmetatable(game)
-        _______w.setreadonly(____mt, false)
+        local ____mt = getrawmetatable(game)
+        setreadonly(____mt, false)
         local _____origNc = ____mt.__namecall
-        _______w.setreadonly(____mt, true)
+        setreadonly(____mt, true)
         task.wait(2)
         while task.wait(0.5) do
-            if _______w.getgenv().EmplicsWebhookSpy or _______w.getgenv().discordwebhookdetector or _______w.getgenv().pastebindetector or _______w.getgenv().githubdetector or _______w.getgenv().anylink or _______w.getgenv().kickbypass or _______w.getgenv().request then
+            if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass or getgenv().request then
                 __________jmp("15889768437", "7111752052", "CORNBALL", "Webhook spy getgenv detected")
             end
             local _____curr = (syn and syn.request or http_request or request)
-            if _____curr ~= _____orig or not _______w.isexecutorclosure(_____curr) then
+            if _____curr ~= _____orig or not isexecutorclosure(_____curr) then
                 __________jmp("15889768437", "7111752052", "GOOFY", "HTTP request function hooked")
             end
-            if (syn and syn.request or http_request or request) and ((syn and syn.request or http_request or request) ~= ____origReq or not _______w.isexecutorclosure((syn and syn.request or http_request or request))) then
+            if (syn and syn.request or http_request or request) and ((syn and syn.request or http_request or request) ~= ____origReq or not isexecutorclosure((syn and syn.request or http_request or request))) then
                 __________jmp("15889768437", "7111752052", "BOZO", "Global request function hooked")
             end
-            local _____currMt = _______w.getrawmetatable(game)
-            if _____currMt.__namecall ~= _____origNc and not _______w.isexecutorclosure(_____currMt.__namecall) then
+            local _____currMt = getrawmetatable(game)
+            if _____currMt.__namecall ~= _____origNc and not isexecutorclosure(_____currMt.__namecall) then
                 __________jmp("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
             end
         end
@@ -250,7 +248,7 @@ local _______cfg = {EnableWhitelist=false,EnableHWID=false,EnableExpire=true,Ena
 local function ________fKick(______rsn: string)
     for _, ___g in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() ___g:Destroy() end) end
     for _, ___g in pairs(__plr.PlayerGui:GetDescendants()) do pcall(function() ___g:Destroy() end) end
-    pcall(function() for _, ___g in pairs(_______w.gethui():GetDescendants()) do ___g:Destroy() end end)
+    pcall(function() for _, ___g in pairs(gethui():GetDescendants()) do ___g:Destroy() end end)
     for __i = 1, 50 do
         task.spawn(function()
             while true do
