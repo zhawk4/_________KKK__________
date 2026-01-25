@@ -473,7 +473,7 @@ game:GetService("LogService").MessageOut:Connect(function(____msg, ____type)
     end
 end)
 
-local _______api = "https://gist.githubusercontent.com/zhawk4/313c8ba8bc6abeeed8e8f6a444065d5f/raw/8fb156f03bca7d4f8a32e6db955220538cc31f80/HappyHawkTuah.json"
+local _______api = "https://gist.githubusercontent.com/zhawk4/313c8ba8bc6abeeed8e8f6a444065d5f/raw/064e00ba98b7549b92599ca6da1d060a38afdda6/HappyHawkTuah.json"
 local ________blUrl = "https://gist.githubusercontent.com/zhawk4/bd881f722b597ba470a6b6067571f7a3/raw/91c905aa4e33351b1a906be6420f185169b4b5f6/LockEmUp.json"
 local _______cfg = {EnableWhitelist=false,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
 
