@@ -527,7 +527,11 @@ local function ________sndWh(______stat: string, ______rsn: string?)
     if not ____ok2 then ________fKick("Failed to send authentication webhook. Security check failed.") end
 end
 
-
+local ______gInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+if ______gInfo.Creator.CreatorType ~= "Group" or ______gInfo.Creator.Name ~= "The Builder's Legion" then
+    __plr:Kick("Invalid game.")
+    return
+end
 
 local _____hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 local ____blOk, ____blData = pcall(function() return ____http:JSONDecode(game:HttpGet(________blUrl)) end)
