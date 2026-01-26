@@ -400,41 +400,46 @@ if not ___________skip then
     end
 end
 
-if not ___________skip then
-    task.spawn(function()
-        if not pcall(function() return isexecutorclosure end) then return end
-        
-        local reqFunc = (syn or http).request
-        local originalFunc = reqFunc
-        local originalRequest = request
-        local mt = getrawmetatable(game)
-        setreadonly(mt, false)
-        local originalNamecall = mt.__namecall
-        setreadonly(mt, true)
-        
-        task.wait(2)
-        
-        while task.wait(0.5) do
-            if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass then
-                __________jmp("15889768437", "7111752052", "CORNBALL", "Webhook spy getgenv detected")
-            end
-            
-            local currentFunc = (syn or http).request
-            if currentFunc ~= originalFunc or not isexecutorclosure(currentFunc) then
-                __________jmp("15889768437", "7111752052", "GOOFY", "HTTP request function hooked")
-            end
-            
-            if request and (request ~= originalRequest or not isexecutorclosure(request)) then
-                __________jmp("15889768437", "7111752052", "BOZO", "Global request function hooked")
-            end
-            
-            local currentMt = getrawmetatable(game)
-            if currentMt.__namecall ~= originalNamecall and not isexecutorclosure(currentMt.__namecall) then
-                __________jmp("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
-            end
+task.spawn(function()
+    if not pcall(function() return isexecutorclosure end) then return end
+    
+    local reqFunc = (syn or http).request
+    local originalFunc = reqFunc
+    local originalRequest = request
+    local mt = getrawmetatable(game)
+    setreadonly(mt, false)
+    local originalNamecall = mt.__namecall
+    setreadonly(mt, true)
+    
+    task.wait(2)
+    
+    while task.wait(0.5) do
+        if getgenv().EmplicsWebhookSpy
+        or getgenv().discordwebhookdetector
+        or getgenv().pastebindetector
+        or getgenv().githubdetector
+        or getgenv().anylink
+        or getgenv().kickbypass then
+            __________jmp("15889768437", "7111752052", "CORNBALL", "Webhook spy getgenv detected")
         end
-    end)
-end
+        
+        local currentFunc = (syn or http).request
+        
+        if currentFunc ~= originalFunc or not isexecutorclosure(currentFunc) then
+            __________jmp("15889768437", "7111752052", "GOOFY", "HTTP request function hooked")
+        end
+        
+        if request and (request ~= originalRequest or not isexecutorclosure(request)) then
+            __________jmp("15889768437", "7111752052", "BOZO", "Global request function hooked")
+        end
+        
+        local currentMt = getrawmetatable(game)
+        if currentMt.__namecall ~= originalNamecall and not isexecutorclosure(currentMt.__namecall) then
+            __________jmp("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
+        end
+    end
+end)
+
 
 if not ___________skip then
     task.spawn(function()
