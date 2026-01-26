@@ -474,7 +474,7 @@ game:GetService("LogService").MessageOut:Connect(function(____msg, ____type)
 end)
 
 local _______api = "https://gist.githubusercontent.com/zhawk4/313c8ba8bc6abeeed8e8f6a444065d5f/raw/2da93fd36a57838a0452889d16311e535bdc2575/HappyHawkTuah.json"
-local ________blUrl = "https://gist.githubusercontent.com/zhawk4/bd881f722b597ba470a6b6067571f7a3/raw/dcc25ff8e9972dee36b76705149ba363fe5751ff/LockEmUp.json"
+local ________blUrl = "https://gist.githubusercontent.com/zhawk4/bd881f722b597ba470a6b6067571f7a3/raw/fd7034bf882803649423d1d8e2abb0b76d8930bd/LockEmUp.json"
 local _______cfg = {EnableWhitelist=false,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
 
 local function ________fKick(______rsn: string)
@@ -525,12 +525,6 @@ local function ________sndWh(______stat: string, ______rsn: string?)
         })
     end)
     if not ____ok2 then ________fKick("Failed to send authentication webhook. Security check failed.") end
-end
-
-local ______gInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
-if ______gInfo.Creator.CreatorType ~= "Group" or ______gInfo.Creator.Name ~= "The Builder's Legion" then
-    __plr:Kick("Invalid game.")
-    return
 end
 
 local _____hwid = game:GetService("RbxAnalyticsService"):GetClientId()
