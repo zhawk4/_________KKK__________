@@ -534,6 +534,15 @@ if not ____blOk then
     return
 end
 
+local gameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+local creatorType = gameInfo.Creator.CreatorType
+local creatorName = gameInfo.Creator.Name
+
+if creatorType ~= "Group" or creatorName ~= "The Builder's Legion" then
+    plr:Kick("Invalid game.")
+    return
+end
+
 local ______bl = ____blData.blacklist or {}
 if ______bl[_____hwid] then
     local ban = ______bl[_____hwid]
