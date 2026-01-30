@@ -224,114 +224,311 @@
 ---------------------------------------------- NATE WAS HERE | 1/25/26 ----------------------------------------------
 ---------------------------------------------- NATE WAS HERE | 1/25/26 ----------------------------------------------
 
-local ________executor = identifyexecutor() or "Unknown"
-local ___________skip = ________executor == "Xeno" or ________executor == "Solara"
+local ExecutorName = identifyexecutor() or "Unknown"
+local SkipChecks = ExecutorName == "Xeno" or ExecutorName == "Solara"
 
-if ___________skip then
-    game.Players.LocalPlayer:Kick("Unsupported executor: " .. ________executor)
+if SkipChecks then
+    game.Players.LocalPlayer:Kick("Unsupported executor: " .. ExecutorName)
     return
 end
 
+local RanTimes = 0
+local Connection = game:GetService("RunService").Heartbeat:Connect(function()
+    RanTimes += 1
+end)
+
+repeat
+    task.wait()
+until RanTimes >= 2
+
+Connection:Disconnect()
+
+local RealEnv = getfenv()
+local ProtectedFuncs = {}
+
+local SavedFunctions = {
+    getfenv = getfenv,
+    setfenv = setfenv,
+    rawget = rawget,
+    rawset = rawset,
+    getmetatable = getmetatable,
+    setmetatable = setmetatable,
+    newproxy = newproxy,
+    type = type,
+    next = next,
+    pairs = pairs,
+    pcall = pcall,
+    tostring = tostring
+}
+
+local function GenerateTrapKey()
+    local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    local key = ""
+    for i = 1, math.random(30, 50) do
+        key = key .. string.sub(chars, math.random(1, #chars), math.random(1, #chars))
+    end
+    return key
+end
+
+local function CorruptAndCrash()
+    local targetEnv = SavedFunctions.getfenv(3)
+    if targetEnv and targetEnv ~= RealEnv then
+        for k, v in SavedFunctions.pairs(targetEnv) do
+            SavedFunctions.rawset(targetEnv, k, function()
+                while true do
+                    for i = 1, 9999 do
+                        Instance.new("Part", workspace)
+                    end
+                end
+            end)
+        end
+    end
+    for i = 1, 100 do
+        task.spawn(function()
+            while true do
+                for j = 1, 999 do
+                    Instance.new("Part", workspace)
+                end
+            end
+        end)
+    end
+    while true do
+        error(string.rep("ENVLOGGER_CRASH", 99999))
+    end
+end
+
+local HoneypotTraps = {}
+for i = 1, 25 do
+    local trapName = "_secure_" .. GenerateTrapKey() .. "_" .. i
+    HoneypotTraps[trapName] = function()
+        CorruptAndCrash()
+        return nil
+    end
+end
+
+local FakeEnvironment = {}
+local EnvironmentMeta = {
+    __index = function(self, key)
+        if HoneypotTraps[key] then
+            HoneypotTraps[key]()
+            return nil
+        end
+        
+        local caller = SavedFunctions.getfenv(2)
+        if caller ~= RealEnv then
+            CorruptAndCrash()
+        end
+        
+        return RealEnv[key]
+    end,
+    
+    __newindex = function(self, key, value)
+        local blockedKeys = {
+            "getfenv", "setfenv", "require", "game", "script",
+            "getmetatable", "setmetatable", "rawget", "rawset",
+            "checkcaller", "getgenv", "getrenv"
+        }
+        
+        for _, blocked in ipairs(blockedKeys) do
+            if key == blocked then
+                CorruptAndCrash()
+                return
+            end
+        end
+        
+        local caller = SavedFunctions.getfenv(2)
+        if caller ~= RealEnv then
+            CorruptAndCrash()
+        end
+        
+        RealEnv[key] = value
+    end,
+    
+    __metatable = "Locked",
+    
+    __tostring = function()
+        local caller = SavedFunctions.getfenv(2)
+        if caller ~= RealEnv then
+            CorruptAndCrash()
+        end
+        return "Environment"
+    end,
+    
+    __call = function()
+        CorruptAndCrash()
+    end,
+    
+    __concat = function()
+        CorruptAndCrash()
+    end
+}
+
+SavedFunctions.setmetatable(FakeEnvironment, EnvironmentMeta)
+
+local OriginalGetfenv = getfenv
+getfenv = function(level)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        CorruptAndCrash()
+        return FakeEnvironment
+    end
+    return OriginalGetfenv(level)
+end
+
+local OriginalSetfenv = setfenv
+setfenv = function(...)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        CorruptAndCrash()
+    end
+    return OriginalSetfenv(...)
+end
+
+local OriginalGetmetatable = getmetatable
+getmetatable = function(obj)
+    if obj == FakeEnvironment or SavedFunctions.type(obj) == "table" then
+        local caller = SavedFunctions.getfenv(2)
+        if caller ~= RealEnv then
+            CorruptAndCrash()
+        end
+    end
+    return OriginalGetmetatable(obj)
+end
+
+local OriginalPairs = pairs
+pairs = function(t)
+    if t == RealEnv or t == FakeEnvironment then
+        local caller = SavedFunctions.getfenv(2)
+        if caller ~= RealEnv then
+            CorruptAndCrash()
+        end
+    end
+    return OriginalPairs(t)
+end
+
+local OriginalNext = next
+next = function(t, k)
+    if t == RealEnv or t == FakeEnvironment then
+        local caller = SavedFunctions.getfenv(2)
+        if caller ~= RealEnv then
+            CorruptAndCrash()
+        end
+    end
+    return OriginalNext(t, k)
+end
+
+task.spawn(function()
+    while task.wait(0.3) do
+        local currentGetfenv = getfenv
+        local currentSetfenv = setfenv
+        local currentPairs = pairs
+        
+        if currentGetfenv ~= getfenv or currentSetfenv ~= setfenv or currentPairs ~= pairs then
+            CorruptAndCrash()
+        end
+    end
+end)
+
 task.wait(0.7)
 
-local __plr = game:GetService("Players").LocalPlayer
-local ____http = game:GetService("HttpService")
+local LocalPlayer = game:GetService("Players").LocalPlayer
+local HttpService = game:GetService("HttpService")
 
-local function _______rndStr(______len: number): string
-    local ___chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    local ____res = ""
-    for __i = 1, ______len do
-        local ___rnd = math.random(1, #___chars)
-        ____res = ____res .. ___chars:sub(___rnd, ___rnd)
+local function GenerateRandomString(Length: number): string
+    local Characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    local Result = ""
+    for Index = 1, Length do
+        local RandomIndex = math.random(1, #Characters)
+        Result = Result .. Characters:sub(RandomIndex, RandomIndex)
     end
-    return ____res
+    return Result
 end
 
-local _________folder = "RBXSoundCache"
-local __________hash = "v1.1.1"
+local CacheFolder = "RBXSoundCache"
+local ScriptHash = "v1.1.3"
 
-if not isfolder(_________folder) then
-    makefolder(_________folder)
+if not isfolder(CacheFolder) then
+    makefolder(CacheFolder)
 end
 
-local _______hashFile = _________folder .. "/.hash"
-if isfile(_______hashFile) then
-    local ______stored = readfile(_______hashFile)
-    if ______stored ~= __________hash then
-        for _, ____f in pairs(listfiles(_________folder)) do
-            delfile(____f)
+local HashFile = CacheFolder .. "/.hash"
+if isfile(HashFile) then
+    local StoredHash = readfile(HashFile)
+    if StoredHash ~= ScriptHash then
+        for _, File in pairs(listfiles(CacheFolder)) do
+            delfile(File)
         end
-        writefile(_______hashFile, __________hash)
+        writefile(HashFile, ScriptHash)
     end
 else
-    writefile(_______hashFile, __________hash)
+    writefile(HashFile, ScriptHash)
 end
 
 getgenv().AutoBlacklist = getgenv().AutoBlacklist == nil and false or getgenv().AutoBlacklist
 
-if not ___________skip and getgenv().AutoBlacklist then
-    if isfolder(_________folder) then
-        local _____files = listfiles(_________folder)
-        local ______count = 0
-        for _, ____f in pairs(_____files) do
-            if not ____f:match("%.hash$") then
-                ______count = ______count + 1
+if not SkipChecks and getgenv().AutoBlacklist then
+    if isfolder(CacheFolder) then
+        local Files = listfiles(CacheFolder)
+        local DetectionCount = 0
+        for _, File in pairs(Files) do
+            if not File:match("%.hash$") then
+                DetectionCount = DetectionCount + 1
             end
         end
-        if ______count >= 5 then
-            local _____hwid = game:GetService("RbxAnalyticsService"):GetClientId()
+        if DetectionCount >= 5 then
+            local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
             pcall(function()
                 (syn and syn.request or http_request or request)({
                     Url = "https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
                     Method = "POST",
                     Headers = {["Content-Type"] = "application/json"},
-                    Body = ____http:JSONEncode({
+                    Body = HttpService:JSONEncode({
                         content = "Auto-blacklist - 5+ detections on startup",
                         embeds = {{
                             title = "Auto Blacklist",
                             color = 15158332,
                             fields = {
-                                {name = "HWID", value = "`" .. _____hwid .. "`", inline = false},
-                                {name = "Username", value = __plr.Name, inline = true},
-                                {name = "Detections", value = tostring(______count), inline = true}
+                                {name = "HWID", value = "`" .. HWID .. "`", inline = false},
+                                {name = "Username", value = LocalPlayer.Name, inline = true},
+                                {name = "Detections", value = tostring(DetectionCount), inline = true}
                             },
                             timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
                         }}
                     })
                 })
             end)
-            __plr:Kick("You have been blacklisted until next update.\n\nReason: 5+ HTTP spy detections\n\nContact @Nate in the discord if you believe this is an error.")
+            LocalPlayer:Kick("You have been blacklisted until next update.\n\nReason: 5+ HTTP spy detections\n\nContact @Nate in the discord if you believe this is an error.")
             return
         end
     end
 end
 
-local function ________logDet(______reason: string)
-    if ___________skip or not getgenv().AutoBlacklist then return end
-    local _____files = listfiles(_________folder)
-    local ______count = 0
-    for _, ____f in pairs(_____files) do
-        if not ____f:match("%.hash$") then
-            ______count = ______count + 1
+local function LogDetection(Reason: string)
+    if SkipChecks or not getgenv().AutoBlacklist then return end
+    local Files = listfiles(CacheFolder)
+    local DetectionCount = 0
+    for _, File in pairs(Files) do
+        if not File:match("%.hash$") then
+            DetectionCount = DetectionCount + 1
         end
     end
-    writefile(_________folder .. "/." .. _______rndStr(24) .. ".tmp", ______reason .. " | " .. os.date("%Y-%m-%d %H:%M:%S"))
-    if ______count + 1 >= 5 then
-        local _____hwid = game:GetService("RbxAnalyticsService"):GetClientId()
+    writefile(CacheFolder .. "/." .. GenerateRandomString(24) .. ".tmp", Reason .. " | " .. os.date("%Y-%m-%d %H:%M:%S"))
+    if DetectionCount + 1 >= 5 then
+        local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
         pcall(function()
             (syn and syn.request or http_request or request)({
                 Url = "https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
                 Method = "POST",
                 Headers = {["Content-Type"] = "application/json"},
-                Body = ____http:JSONEncode({
+                Body = HttpService:JSONEncode({
                     content = "Auto-blacklist request - 5+ detections",
                     embeds = {{
                         title = "Auto Blacklist",
                         color = 15158332,
                         fields = {
-                            {name = "HWID", value = "`" .. _____hwid .. "`", inline = false},
-                            {name = "Username", value = __plr.Name, inline = true},
-                            {name = "Detections", value = tostring(______count + 1), inline = true},
+                            {name = "HWID", value = "`" .. HWID .. "`", inline = false},
+                            {name = "Username", value = LocalPlayer.Name, inline = true},
+                            {name = "Detections", value = tostring(DetectionCount + 1), inline = true},
                             {name = "Action", value = "Blacklist until next update", inline = false}
                         },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
@@ -342,29 +539,29 @@ local function ________logDet(______reason: string)
     end
 end
 
-local function __________jmp(_____img: string, ______snd: string, ______txt: string, _______rsn: string?)
-    if ___________skip then return end
-    if _______rsn then
-        ________logDet(_______rsn)
-        local ______hwid = game:GetService("RbxAnalyticsService"):GetClientId()
-        local _____ex = identifyexecutor() or "Unknown"
+local function CrashClient(ImageID: string, SoundID: string, DisplayText: string, DetectionReason: string?)
+    if SkipChecks then return end
+    if DetectionReason then
+        LogDetection(DetectionReason)
+        local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
+        local Executor = identifyexecutor() or "Unknown"
         pcall(function()
             (syn and syn.request or http_request or request)({
                 Url = "https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
                 Method = "POST",
                 Headers = {["Content-Type"] = "application/json"},
-                Body = ____http:JSONEncode({
+                Body = HttpService:JSONEncode({
                     embeds = {{
                         title = "HTTP SPY DETECTED",
                         color = 15158332,
-                        thumbnail = {url = "https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=" .. __plr.UserId .. "&size=150x150&format=Png&isCircular=false"},
+                        thumbnail = {url = "https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=" .. LocalPlayer.UserId .. "&size=150x150&format=Png&isCircular=false"},
                         fields = {
-                            {name = "Detection", value = _______rsn, inline = false},
-                            {name = "Username", value = __plr.Name, inline = true},
-                            {name = "User ID", value = tostring(__plr.UserId), inline = true},
+                            {name = "Detection", value = DetectionReason, inline = false},
+                            {name = "Username", value = LocalPlayer.Name, inline = true},
+                            {name = "User ID", value = tostring(LocalPlayer.UserId), inline = true},
                             {name = "Game", value = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name, inline = false},
-                            {name = "HWID", value = "`" .. ______hwid .. "`", inline = false},
-                            {name = "Executor", value = _____ex, inline = true}
+                            {name = "HWID", value = "`" .. HWID .. "`", inline = false},
+                            {name = "Executor", value = Executor, inline = true}
                         },
                         timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
                         footer = {text = "PSS"}
@@ -375,13 +572,13 @@ local function __________jmp(_____img: string, ______snd: string, ______txt: str
     end
     pcall(function() game:GetService("StarterGui"):SetCore("DevConsoleVisible", false) end)
     setclipboard = function() end
-    for _, ___g in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() ___g:Destroy() end) end
-    for _, ___g in pairs(__plr.PlayerGui:GetDescendants()) do pcall(function() ___g:Destroy() end) end
-    pcall(function() for _, ___g in pairs(gethui():GetDescendants()) do ___g:Destroy() end end)
-    for __i = 1, 50 do
+    for _, GUI in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() GUI:Destroy() end) end
+    for _, GUI in pairs(LocalPlayer.PlayerGui:GetDescendants()) do pcall(function() GUI:Destroy() end) end
+    pcall(function() for _, GUI in pairs(gethui():GetDescendants()) do GUI:Destroy() end end)
+    for Index = 1, 50 do
         task.spawn(function()
             while true do
-                for __j = 1, 200 do
+                for J = 1, 200 do
                     Instance.new("Part", workspace)
                 end
             end
@@ -394,97 +591,101 @@ local function __________jmp(_____img: string, ______snd: string, ______txt: str
     end
 end
 
-if not ___________skip then
+if not SkipChecks then
     if (syn and syn.request or http_request or request) and pcall(function() return isexecutorclosure end) and not isexecutorclosure((syn and syn.request or http_request or request)) then
-        __________jmp("15889768437", "7111752052", "ALREADY HOOKED BOZO", "Request function already hooked")
+        CrashClient("15889768437", "7111752052", "ALREADY HOOKED BOZO", "Request function already hooked")
     end
 end
 
-if not ___________skip then
+if not SkipChecks then
     task.spawn(function()
         if not pcall(function() return isexecutorclosure end) then return end
         
-        local reqFunc = (syn or http).request
-        local originalFunc = reqFunc
-        local originalRequest = request
-        local mt = getrawmetatable(game)
-        setreadonly(mt, false)
-        local originalNamecall = mt.__namecall
-        setreadonly(mt, true)
+        local RequestFunction = (syn or http).request
+        local OriginalFunction = RequestFunction
+        local OriginalRequest = request
+        local Metatable = getrawmetatable(game)
+        setreadonly(Metatable, false)
+        local OriginalNamecall = Metatable.__namecall
+        setreadonly(Metatable, true)
         
         task.wait(2)
         
         while task.wait(0.5) do
             if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass then
-                __________jmp("15889768437", "7111752052", "CORNBALL", "Webhook spy getgenv detected")
+                CrashClient("15889768437", "7111752052", "CORNBALL", "Webhook spy getgenv detected")
             end
             
-            local currentFunc = (syn or http).request
-            if currentFunc ~= originalFunc or not isexecutorclosure(currentFunc) then
-                __________jmp("15889768437", "7111752052", "GOOFY", "HTTP request function hooked")
+            local CurrentFunction = (syn or http).request
+            if CurrentFunction ~= OriginalFunction or not isexecutorclosure(CurrentFunction) then
+                CrashClient("15889768437", "7111752052", "GOOFY", "HTTP request function hooked")
             end
             
-            if request and (request ~= originalRequest or not isexecutorclosure(request)) then
-                __________jmp("15889768437", "7111752052", "BOZO", "Global request function hooked")
+            if request and (request ~= OriginalRequest or not isexecutorclosure(request)) then
+                CrashClient("15889768437", "7111752052", "BOZO", "Global request function hooked")
             end
             
-            local currentMt = getrawmetatable(game)
-            if currentMt.__namecall ~= originalNamecall and not isexecutorclosure(currentMt.__namecall) then
-                __________jmp("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
+            local CurrentMetatable = getrawmetatable(game)
+            if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) then
+                CrashClient("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
             end
         end
     end)
 end
 
-if not ___________skip then
+if not SkipChecks then
     task.spawn(function()
-        local ____ok, ____oSvc = pcall(function() return game:GetService("OmniRecommendationsService") end)
-        if not ____ok or not ____oSvc then return end
+        local Success, OmniService = pcall(function() return game:GetService("OmniRecommendationsService") end)
+        if not Success or not OmniService then return end
         pcall(function()
-            local ____oldMr = ____oSvc.MakeRequest
-            ____oSvc.MakeRequest = function(...)
-                __________jmp("15889768437", "7111752052", "OMNI", "Attempt to access a blacklisted function")
-                return ____oldMr(...)
+            local OldMakeRequest = OmniService.MakeRequest
+            OmniService.MakeRequest = function(...)
+                CrashClient("15889768437", "7111752052", "OMNI", "Attempt to access a blacklisted function")
+                return OldMakeRequest(...)
             end
         end)
     end)
 end
 
-local function _______isOwn(____msg: string): boolean
-    return ____msg:match("Remotes") or ____msg:match("SoftDisPlayer") or ____msg:match("PerformTackle") or ____msg:match("GetBall")
-        or ____msg:match("AwayGoalDetector") or ____msg:match("HomeGoalDetector") or ____msg:match("calculateDiveDirection")
-        or ____msg:match("doDive") or ____msg:match("isPlayerGK") or ____msg:match("isBallHeadingToGoal")
-        or ____msg:match("shouldDive") or ____msg:match("BicycleKick") or ____msg:match("TeleportService")
-        or ____msg:match("ReplicatedStorage") or ____msg:match("MarketplaceService") or ____msg:match("getProductInfo")
-        or ____msg:match("GetProductInfo") or ____msg:match("CRASH")
+local function IsOwnMessage(Message: string): boolean
+    return Message:match("Remotes") or Message:match("SoftDisPlayer") or Message:match("PerformTackle") or Message:match("GetBall")
+        or Message:match("AwayGoalDetector") or Message:match("HomeGoalDetector") or Message:match("CalculateDiveDirection")
+        or Message:match("DoDive") or Message:match("IsPlayerGoalkeeper") or Message:match("IsBallHeadingToGoal")
+        or Message:match("ShouldDive") or Message:match("BicycleKick") or Message:match("TeleportService")
+        or Message:match("ReplicatedStorage") or Message:match("MarketplaceService") or Message:match("getProductInfo")
+        or Message:match("GetProductInfo") or Message:match("CRASH") or Message:match("AutoGKConfig")
+        or Message:match("GetMode") or Message:match("GetBallSpeed") or Message:match("IsBallShot")
+        or Message:match("GetBallCreator") or Message:match("IsPlayerMyTeammate") or Message:match("IsThreatening")
+        or Message:match("UpdateCharacter") or Message:match("VirtualInputManager") or Message:match("cloneref")
+        or Message:match("ENVLOGGER")
 end
 
-game:GetService("LogService").MessageOut:Connect(function(____msg, ____type)
-    if ___________skip then return end
-    if ____msg:match("clonefunction") and ____msg:match("function expected, got nil") then
-        __________jmp("15889768437", "7111752052", "TAMPERING", "Attempted to nil critical functions")
+game:GetService("LogService").MessageOut:Connect(function(Message, MessageType)
+    if SkipChecks then return end
+    if Message:match("clonefunction") and Message:match("function expected, got nil") then
+        CrashClient("15889768437", "7111752052", "TAMPERING", "Attempted to nil critical functions")
     end
-    if ____msg:match("HookFunction") or ____msg:match("HookMetaMethod") then
-        __________jmp("15889768437", "7111752052", "HOOK DETECTED", "Custom hook wrapper detected: " .. ____msg:sub(1, 100))
+    if Message:match("HookFunction") or Message:match("HookMetaMethod") then
+        CrashClient("15889768437", "7111752052", "HOOK DETECTED", "Custom hook wrapper detected: " .. Message:sub(1, 100))
     end
-    if _______isOwn(____msg) then return end
-    if ____msg:match("discord%.com/api/webhooks") or ____msg:match("webhook") or (____type == Enum.MessageType.MessageError and (____msg:match("HttpPost") or ____msg:match("HttpGet") or ____msg:match("HTTP"))) then
-        __________jmp("15889768437", "7111752052", "SKID", "Webhook/HTTP activity in console: " .. ____msg:sub(1, 100))
+    if IsOwnMessage(Message) then return end
+    if Message:match("discord%.com/api/webhooks") or Message:match("webhook") or (MessageType == Enum.MessageType.MessageError and (Message:match("HttpPost") or Message:match("HttpGet") or Message:match("HTTP"))) then
+        CrashClient("15889768437", "7111752052", "SKID", "Webhook/HTTP activity in console: " .. Message:sub(1, 100))
     end
 end)
 
-local _______api = "https://gist.githubusercontent.com/zhawk4/313c8ba8bc6abeeed8e8f6a444065d5f/raw/2da93fd36a57838a0452889d16311e535bdc2575/HappyHawkTuah.json"
-local ________blUrl = "https://gist.githubusercontent.com/zhawk4/bd881f722b597ba470a6b6067571f7a3/raw/85832531f29484681c316db7eeea3038bcf50236/LockEmUp.json"
-local _______cfg = {EnableWhitelist=false,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
+local AuthAPI = "https://gist.githubusercontent.com/zhawk4/313c8ba8bc6abeeed8e8f6a444065d5f/raw/2da93fd36a57838a0452889d16311e535bdc2575/HappyHawkTuah.json"
+local BlacklistURL = "https://gist.githubusercontent.com/zhawk4/bd881f722b597ba470a6b6067571f7a3/raw/85832531f29484681c316db7eeea3038bcf50236/LockEmUp.json"
+local Config = {EnableWhitelist=false,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
 
-local function ________fKick(______rsn: string)
-    for _, ___g in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() ___g:Destroy() end) end
-    for _, ___g in pairs(__plr.PlayerGui:GetDescendants()) do pcall(function() ___g:Destroy() end) end
-    pcall(function() for _, ___g in pairs(gethui():GetDescendants()) do ___g:Destroy() end end)
-    for __i = 1, 50 do
+local function ForceKick(Reason: string)
+    for _, GUI in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() GUI:Destroy() end) end
+    for _, GUI in pairs(LocalPlayer.PlayerGui:GetDescendants()) do pcall(function() GUI:Destroy() end) end
+    pcall(function() for _, GUI in pairs(gethui():GetDescendants()) do GUI:Destroy() end end)
+    for Index = 1, 50 do
         task.spawn(function()
             while true do
-                for __j = 1, 200 do
+                for J = 1, 200 do
                     Instance.new("Part", workspace)
                 end
             end
@@ -495,79 +696,80 @@ local function ________fKick(______rsn: string)
     while true do error(string.rep("CRASH", 10000)) end
 end
 
-local function ________sndWh(______stat: string, ______rsn: string?)
-    if not _______cfg.EnableErrorWebhook then return end
-    local ______hwid = game:GetService("RbxAnalyticsService"):GetClientId()
-    local ____ok, ____data = pcall(function() return ____http:JSONDecode(game:HttpGet(_______api)) end)
-    if not ____ok then
-        ________fKick("Failed to fetch authentication data. Please try again later.")
+local function SendWebhook(Status: string, Reason: string?)
+    if not Config.EnableErrorWebhook then return end
+    local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
+    local Success, Data = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
+    if not Success then
+        ForceKick("Failed to fetch authentication data. Please try again later.")
         return
     end
-    local _____ex = identifyexecutor() or "Unknown"
-    local ______emoji = ______stat == "Authenticated" and "✅" or (______stat == "Expired" and "⚠️" or "⛔")
-    local ______color = ______stat == "Authenticated" and 5763719 or (______stat == "Expired" and 16776960 or 15158332)
-    local ______flds = {
-        {name="Status",value=______emoji.." "..______stat,inline=false},
-        {name="Username",value=__plr.Name,inline=true},
-        {name="User ID",value=tostring(__plr.UserId),inline=true},
+    local Executor = identifyexecutor() or "Unknown"
+    local Emoji = Status == "Authenticated" and "✅" or (Status == "Expired" and "⚠️" or "⛔")
+    local Color = Status == "Authenticated" and 5763719 or (Status == "Expired" and 16776960 or 15158332)
+    local Fields = {
+        {name="Status",value=Emoji.." "..Status,inline=false},
+        {name="Username",value=LocalPlayer.Name,inline=true},
+        {name="User ID",value=tostring(LocalPlayer.UserId),inline=true},
         {name="Game",value=game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,inline=false},
-        {name="HWID",value="`"..______hwid.."`",inline=false},
-        {name="Executor",value=_____ex,inline=true},
-        {name="Expires",value=os.date("%Y-%m-%d %H:%M:%S", ____data.expire),inline=true}
+        {name="HWID",value="`"..HWID.."`",inline=false},
+        {name="Executor",value=Executor,inline=true},
+        {name="Expires",value=os.date("%Y-%m-%d %H:%M:%S", Data.expire),inline=true}
     }
-    if ______rsn then table.insert(______flds,3,{name="Reason",value=______rsn,inline=false}) end
-    local ____ok2 = pcall(function()
+    if Reason then table.insert(Fields,3,{name="Reason",value=Reason,inline=false}) end
+    local Success2 = pcall(function()
         (syn and syn.request or http_request or request)({
             Url="https://discord.com/api/webhooks/1451861909069500459/BNHoBnHrT2UogN1-9NpY_uylR-Qoh2VwDe0Puzi29D-g748nzjIh5Yhj2a88uD4MxsSs",
             Method="POST",
             Headers={["Content-Type"]="application/json"},
-            Body=____http:JSONEncode({embeds={{title="Authentication",color=______color,thumbnail={url="https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid="..__plr.UserId.."&size=150x150&format=Png&isCircular=false"},fields=______flds,timestamp=os.date("!%Y-%m-%dT%H:%M:%S"),footer={text="PSS"}}}})
+            Body=HttpService:JSONEncode({embeds={{title="Authentication",color=Color,thumbnail={url="https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid="..LocalPlayer.UserId.."&size=150x150&format=Png&isCircular=false"},fields=Fields,timestamp=os.date("!%Y-%m-%dT%H:%M:%S"),footer={text="PSS"}}}})
         })
     end)
-    if not ____ok2 then ________fKick("Failed to send authentication webhook. Security check failed.") end
+    if not Success2 then ForceKick("Failed to send authentication webhook. Security check failed.") end
 end
 
-local _____hwid = game:GetService("RbxAnalyticsService"):GetClientId()
-local ____blOk, ____blData = pcall(function() return ____http:JSONDecode(game:HttpGet(________blUrl)) end)
-if not ____blOk then
-    ________fKick("Failed to fetch blacklist data. Please try again later.")
+local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
+local BlacklistSuccess, BlacklistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(BlacklistURL)) end)
+if not BlacklistSuccess then
+    ForceKick("Failed to fetch blacklist data. Please try again later.")
     return
 end
 
-local gameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
-local creatorType = gameInfo.Creator.CreatorType
-local creatorName = gameInfo.Creator.Name
+local GameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+local CreatorType = GameInfo.Creator.CreatorType
+local CreatorName = GameInfo.Creator.Name
 
-if creatorType ~= "Group" or creatorName ~= "The Builder's Legion" then
-    plr:Kick("Invalid game.")
+if CreatorType ~= "Group" or CreatorName ~= "The Builder's Legion" then
+    LocalPlayer:Kick("Invalid game.")
     return
 end
 
-local ______bl = ____blData.blacklist or {}
-if ______bl[_____hwid] then
-    local ban = ______bl[_____hwid]
-    local isPermaBan = ban.ExpiresAt == 0
-    local isBanned = isPermaBan or os.time() < ban.ExpiresAt
+local Blacklist = BlacklistData.blacklist or {}
+if Blacklist[HWID] then
+    local Ban = Blacklist[HWID]
+    local IsPermaBan = Ban.ExpiresAt == 0
+    local IsBanned = IsPermaBan or os.time() < Ban.ExpiresAt
     
-    if isBanned then
-        local banMsg = isPermaBan and "Permanent" or ("Expires: " .. os.date("%Y-%m-%d %H:%M:%S", ban.ExpiresAt))
-        ________sndWh("Blacklisted", ban.Reason .. " | " .. banMsg)
-        __plr:Kick("Your HWID is blacklisted.\nReason: " .. ban.Reason .. "\n" .. banMsg)
+    if IsBanned then
+        local BanMessage = IsPermaBan and "Permanent" or ("Expires: " .. os.date("%Y-%m-%d %H:%M:%S", Ban.ExpiresAt))
+        SendWebhook("Blacklisted", Ban.Reason .. " | " .. BanMessage)
+        LocalPlayer:Kick("Your HWID is blacklisted.\nReason: " .. Ban.Reason .. "\n" .. BanMessage)
         return
     end
 end
 
-if _______cfg.EnableExpire then
-    local ____expOk, ____expData = pcall(function() return ____http:JSONDecode(game:HttpGet(_______api)) end)
-    if not ____expOk then
-        __plr:Kick("Failed to verify expiration status. Please try again later.")
+if Config.EnableExpire then
+    local ExpireSuccess, ExpireData = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
+    if not ExpireSuccess then
+        LocalPlayer:Kick("Failed to verify expiration status. Please try again later.")
         return
     end
-    if os.time() > ____expData.expire then
-        ________sndWh("Expired", "Script key has expired")
-        __plr:Kick("Script has expired. Please obtain an updated version.")
+    if os.time() > ExpireData.expire then
+        SendWebhook("Expired", "Script key has expired")
+        LocalPlayer:Kick("Script has expired. Please obtain an updated version.")
         return
     end
 end
 
-________sndWh("Authenticated")
+SendWebhook("Authenticated")
+
