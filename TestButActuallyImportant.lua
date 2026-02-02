@@ -223,7 +223,6 @@
 ---------------------------------------------- NATE WAS HERE | 1/25/26 ----------------------------------------------
 ---------------------------------------------- NATE WAS HERE | 1/25/26 ----------------------------------------------
 ---------------------------------------------- NATE WAS HERE | 1/25/26 ----------------------------------------------
-
 local ExecutorName = identifyexecutor() or "Unknown"
 local SkipChecks = ExecutorName == "Xeno" or ExecutorName == "Solara"
 
@@ -247,6 +246,17 @@ local originalIsfolder = isfolder
 local originalIsfile = isfile
 local originalLoadstring = loadstring
 
+local RanTimes = 0
+local Connection = game:GetService("RunService").Heartbeat:Connect(function()
+    RanTimes += 1
+end)
+
+repeat
+    task.wait()
+until RanTimes >= 2
+
+Connection:Disconnect()
+
 local RealEnv = getfenv()
 
 local SavedFunctions = {
@@ -264,7 +274,28 @@ local SavedFunctions = {
     tostring = tostring
 }
 
+local function GenerateTrapKey()
+    local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+    local key = ""
+    for i = 1, math.random(30, 50) do
+        key = key .. string.sub(chars, math.random(1, #chars), math.random(1, #chars))
+    end
+    return key
+end
+
 local function CorruptAndCrash()
+    local targetEnv = SavedFunctions.getfenv(3)
+    if targetEnv and targetEnv ~= RealEnv then
+        for k, v in SavedFunctions.pairs(targetEnv) do
+            SavedFunctions.rawset(targetEnv, k, function()
+                while true do
+                    for i = 1, 9999 do
+                        Instance.new("Part", workspace)
+                    end
+                end
+            end)
+        end
+    end
     for i = 1, 100 do
         task.spawn(function()
             while true do
@@ -277,141 +308,6 @@ local function CorruptAndCrash()
     while true do
         error(string.rep("ENVLOGGER_CRASH", 99999))
     end
-end
-
-getgc = function(includeTables)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return {}
-end
-
-debug = setmetatable({}, {
-    __index = function(self, key)
-        local caller = SavedFunctions.getfenv(2)
-        if caller ~= RealEnv then
-            CorruptAndCrash()
-        end
-        return function() return {} end
-    end,
-    __newindex = function() CorruptAndCrash() end
-})
-
-getreg = function()
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return {}
-end
-
-getscripts = function()
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return {}
-end
-
-getscriptclosure = function(script)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return function() end
-end
-
-getnilinstances = function()
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return {}
-end
-
-writefile = function(filename, content)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return originalWritefile(filename, content)
-end
-
-readfile = function(filename)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return originalReadfile(filename)
-end
-
-listfiles = function(folder)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return originalListfiles(folder)
-end
-
-delfile = function(filename)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return originalDelfile(filename)
-end
-
-makefolder = function(foldername)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return originalMakefolder(foldername)
-end
-
-isfolder = function(foldername)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return originalIsfolder(foldername)
-end
-
-isfile = function(filename)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return originalIsfile(filename)
-end
-
-loadstring = function(source, chunkname)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return originalLoadstring(source, chunkname)
-end
-
-local RanTimes = 0
-local Connection = game:GetService("RunService").Heartbeat:Connect(function()
-    RanTimes += 1
-end)
-
-repeat
-    task.wait()
-until RanTimes >= 2
-
-Connection:Disconnect()
-
-local function GenerateTrapKey()
-    local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-    local key = ""
-    for i = 1, math.random(30, 50) do
-        key = key .. string.sub(chars, math.random(1, #chars), math.random(1, #chars))
-    end
-    return key
 end
 
 local HoneypotTraps = {}
@@ -480,6 +376,7 @@ local EnvironmentMeta = {
     end
 }
 
+
 SavedFunctions.setmetatable(FakeEnvironment, EnvironmentMeta)
 
 local OriginalGetfenv = getfenv
@@ -532,6 +429,124 @@ next = function(t, k)
         end
     end
     return OriginalNext(t, k)
+end
+
+getgc = function(includeTables)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        CorruptAndCrash()
+    end
+    return {}
+end
+
+debug = setmetatable({}, {
+    __index = function(self, key)
+        local caller = SavedFunctions.getfenv(2)
+        if caller ~= RealEnv then
+            CorruptAndCrash()
+        end
+        return function() return {} end
+    end,
+    __newindex = function() CorruptAndCrash() end
+})
+
+getreg = function()
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        CorruptAndCrash()
+    end
+    return {}
+end
+
+getscripts = function()
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        CorruptAndCrash()
+    end
+    return {}
+end
+
+getscriptclosure = function(script)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        CorruptAndCrash()
+    end
+    return function() end
+end
+
+getnilinstances = function()
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        CorruptAndCrash()
+    end
+    return {}
+end
+
+writefile = function(filename, content)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        CorruptAndCrash()
+    end
+    return originalWritefile(filename, content)
+end
+
+readfile = function(filename)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalReadfile(filename)
+end
+
+listfiles = function(folder)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalListfiles(folder)
+end
+
+delfile = function(filename)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalDelfile(filename)
+end
+
+makefolder = function(foldername)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalMakefolder(foldername)
+end
+
+isfolder = function(foldername)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalIsfolder(foldername)
+end
+
+isfile = function(filename)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        error("File operations have been disabled for security purposes.")
+    end
+    return originalIsfile(filename)
+end
+
+loadstring = function(source, chunkname)
+    local caller = SavedFunctions.getfenv(2)
+    if caller ~= RealEnv then
+        if source and source:match("https://raw.githubusercontent.com/8931247412412421245524343255485937065/cdn%-assets%-raw/refs/heads/main/TestButActuallyImportant%.lua") then
+            return originalLoadstring(source, chunkname)
+        end
+        error("Loadstring has been disabled for security purposes.")
+    end
+    return originalLoadstring(source, chunkname)
 end
 
 local ScriptFingerprint = {}
@@ -812,7 +827,7 @@ local function IsOwnMessage(Message: string): boolean
         or Message:match("GetMode") or Message:match("GetBallSpeed") or Message:match("IsBallShot")
         or Message:match("GetBallCreator") or Message:match("IsPlayerMyTeammate") or Message:match("IsThreatening")
         or Message:match("UpdateCharacter") or Message:match("VirtualInputManager") or Message:match("cloneref")
-        or Message:match("ENVLOGGER")
+        or Message:match("ENVLOGGER") or Message:match("security purposes")
 end
 
 game:GetService("LogService").MessageOut:Connect(function(Message, MessageType)
@@ -825,6 +840,9 @@ game:GetService("LogService").MessageOut:Connect(function(Message, MessageType)
     end
     if Message:match("strings") or Message:match("Saved") or Message:match("dumper") or Message:match("constants") or Message:match("upvalues") then
         CrashClient("15889768437", "7111752052", "STRING DUMPER", "String dumper activity detected: " .. Message:sub(1, 100))
+    end
+    if Message:match("security purposes") then
+        CrashClient("15889768437", "7111752052", "BLOCKED FUNCTION", "Attempted to use blocked function: " .. Message:sub(1, 100))
     end
     if IsOwnMessage(Message) then return end
     if Message:match("discord%.com/api/webhooks") or Message:match("webhook") or (MessageType == Enum.MessageType.MessageError and (Message:match("HttpPost") or Message:match("HttpGet") or Message:match("HTTP"))) then
@@ -877,7 +895,7 @@ local function SendWebhook(Status: string, Reason: string?)
     }
     if Reason then table.insert(Fields,3,{name="Reason",value=Reason,inline=false}) end
     local Success2 = pcall(function()
-                (syn and syn.request or http_request or request)({
+        (syn and syn.request or http_request or request)({
             Url="https://discord.com/api/webhooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
             Method="POST",
             Headers={["Content-Type"]="application/json"},
@@ -893,6 +911,7 @@ if not BlacklistSuccess then
     ForceKick("Failed to fetch blacklist data. Please try again later.")
     return
 end
+
 
 local Blacklist = BlacklistData.blacklist or {}
 if Blacklist[HWID] then
