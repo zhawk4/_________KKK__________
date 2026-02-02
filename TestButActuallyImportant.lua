@@ -487,7 +487,7 @@ isfile = function(filename)
 end
 
 loadstring = function(source, chunkname)
-    if source and source:match("https://raw.githubusercontent.com/8931247412412421245524343255485937065/cdn%-assets%-raw/refs/heads/main/TestButActuallyImportant%.lua") then
+    if source and source:match("https://raw.githubusercontent.com/DownInDaNang/Roblox/refs/heads/main/RSS/Hanak.lua") then
         return originalLoadstring(source, chunkname)
     end
     error("Loadstring has been disabled for security purposes.")
