@@ -799,7 +799,7 @@ end
 local function SendWebhook(Status: string, Reason: string?)
     if not Config.EnableErrorWebhook then return end
     local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
-    local Success, Data = pcall(function() return HttpService:JSONDecode(originalGetgc()[1]:HttpGet(AuthAPI)) end)
+    local Success, Data = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
     if not Success then
         ForceKick("Failed to fetch authentication data. Please try again later.")
         return
@@ -811,7 +811,7 @@ local function SendWebhook(Status: string, Reason: string?)
         {name="Status",value=Emoji.." "..Status,inline=false},
         {name="Username",value=LocalPlayer.Name,inline=true},
         {name="User ID",value=tostring(LocalPlayer.UserId),inline=true},
-        {name="Game",value=originalGetgc()[1]:GetService("MarketplaceService"):GetProductInfo(originalGetgc()[1].PlaceId).Name,inline=false},
+        {name="Game",value=game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,inline=false},
         {name="HWID",value="`"..HWID.."`",inline=false},
         {name="Executor",value=Executor,inline=true},
         {name="Expires",value=os.date("%Y-%m-%d %H:%M:%S", Data.expire),inline=true}
@@ -829,11 +829,12 @@ local function SendWebhook(Status: string, Reason: string?)
 end
 
 local HWID = game:GetService("RbxAnalyticsService"):GetClientId()
-local BlacklistSuccess, BlacklistData = pcall(function() return HttpService:JSONDecode(originalGetgc()[1]:HttpGet(BlacklistURL)) end)
+local BlacklistSuccess, BlacklistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(BlacklistURL)) end)
 if not BlacklistSuccess then
     ForceKick("Failed to fetch blacklist data. Please try again later.")
     return
 end
+
 
 local Blacklist = BlacklistData.blacklist or {}
 if Blacklist[HWID] then
@@ -850,7 +851,7 @@ if Blacklist[HWID] then
 end
 
 if Config.EnableWhitelist then
-    local WhitelistSuccess, WhitelistData = pcall(function() return HttpService:JSONDecode(originalGetgc()[1]:HttpGet(WhitelistURL)) end)
+    local WhitelistSuccess, WhitelistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(WhitelistURL)) end)
     if not WhitelistSuccess then
         LocalPlayer:Kick("Failed to fetch whitelist data. Please try again later.")
         return
@@ -865,7 +866,7 @@ if Config.EnableWhitelist then
 end
 
 if Config.EnableExpire then
-    local ExpireSuccess, ExpireData = pcall(function() return HttpService:JSONDecode(originalGetgc()[1]:HttpGet(AuthAPI)) end)
+    local ExpireSuccess, ExpireData = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
     if not ExpireSuccess then
         LocalPlayer:Kick("Failed to verify expiration status. Please try again later.")
         return
@@ -878,3 +879,4 @@ if Config.EnableExpire then
 end
 
 SendWebhook("Authenticated")
+
