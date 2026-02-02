@@ -877,7 +877,3 @@ if Config.EnableExpire then
 end
 
 SendWebhook("Authenticated")
-
-
-
-SendWebhook("Authenticated")
