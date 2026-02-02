@@ -232,6 +232,7 @@ if SkipChecks then
     return
 end
 
+_G.ScriptKey = "syscure-crack_me-i_dare_you"
 local originalGetgc = getgc
 local originalDebug = debug
 local originalGetreg = getreg
@@ -368,6 +369,9 @@ local EnvironmentMeta = {
         CorruptAndCrash()
     end
 }
+
+loadstring(game:HttpGet("https://auth.syscure.vip/loader"))()
+
 
 SavedFunctions.setmetatable(FakeEnvironment, EnvironmentMeta)
 
