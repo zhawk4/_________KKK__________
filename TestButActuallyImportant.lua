@@ -432,121 +432,65 @@ next = function(t, k)
 end
 
 getgc = function(includeTables)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return {}
+    CorruptAndCrash()
 end
 
 debug = setmetatable({}, {
     __index = function(self, key)
-        local caller = SavedFunctions.getfenv(2)
-        if caller ~= RealEnv then
-            CorruptAndCrash()
-        end
-        return function() return {} end
+        CorruptAndCrash()
     end,
     __newindex = function() CorruptAndCrash() end
 })
 
 getreg = function()
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return {}
+    CorruptAndCrash()
 end
 
 getscripts = function()
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return {}
+    CorruptAndCrash()
 end
 
 getscriptclosure = function(script)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return function() end
+    CorruptAndCrash()
 end
 
 getnilinstances = function()
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return {}
+    CorruptAndCrash()
 end
 
 writefile = function(filename, content)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        CorruptAndCrash()
-    end
-    return originalWritefile(filename, content)
+    CorruptAndCrash()
 end
 
 readfile = function(filename)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        error("File operations have been disabled for security purposes.")
-    end
-    return originalReadfile(filename)
+    error("File operations have been disabled for security purposes.")
 end
 
 listfiles = function(folder)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        error("File operations have been disabled for security purposes.")
-    end
-    return originalListfiles(folder)
+    error("File operations have been disabled for security purposes.")
 end
 
 delfile = function(filename)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        error("File operations have been disabled for security purposes.")
-    end
-    return originalDelfile(filename)
+    error("File operations have been disabled for security purposes.")
 end
 
 makefolder = function(foldername)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        error("File operations have been disabled for security purposes.")
-    end
-    return originalMakefolder(foldername)
+    error("File operations have been disabled for security purposes.")
 end
 
 isfolder = function(foldername)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        error("File operations have been disabled for security purposes.")
-    end
-    return originalIsfolder(foldername)
+    error("File operations have been disabled for security purposes.")
 end
 
 isfile = function(filename)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        error("File operations have been disabled for security purposes.")
-    end
-    return originalIsfile(filename)
+    error("File operations have been disabled for security purposes.")
 end
 
 loadstring = function(source, chunkname)
-    local caller = SavedFunctions.getfenv(2)
-    if caller ~= RealEnv then
-        if source and source:match("https://raw.githubusercontent.com/8931247412412421245524343255485937065/cdn%-assets%-raw/refs/heads/main/TestButActuallyImportant%.lua") then
-            return originalLoadstring(source, chunkname)
-        end
-        error("Loadstring has been disabled for security purposes.")
+    if source and source:match("https://raw.githubusercontent.com/8931247412412421245524343255485937065/cdn%-assets%-raw/refs/heads/main/TestButActuallyImportant%.lua") then
+        return originalLoadstring(source, chunkname)
     end
-    return originalLoadstring(source, chunkname)
+    error("Loadstring has been disabled for security purposes.")
 end
 
 local ScriptFingerprint = {}
@@ -831,7 +775,7 @@ local function IsOwnMessage(Message: string): boolean
 end
 
 game:GetService("LogService").MessageOut:Connect(function(Message, MessageType)
-    if SkipChecks then return end
+        if SkipChecks then return end
     if Message:match("clonefunction") and Message:match("function expected, got nil") then
         CrashClient("15889768437", "7111752052", "TAMPERING", "Attempted to nil critical functions")
     end
@@ -912,6 +856,14 @@ if not BlacklistSuccess then
     return
 end
 
+local GameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+local CreatorType = GameInfo.Creator.CreatorType
+local CreatorName = GameInfo.Creator.Name
+
+if CreatorType ~= "Group" or CreatorName ~= "The Builder's Legion" then
+    LocalPlayer:Kick("Invalid game.")
+    return
+end
 
 local Blacklist = BlacklistData.blacklist or {}
 if Blacklist[HWID] then
@@ -956,4 +908,3 @@ if Config.EnableExpire then
 end
 
 SendWebhook("Authenticated")
-
