@@ -232,6 +232,13 @@ if SkipChecks then
     return
 end
 
+local originalGetgc = getgc
+local originalDebug = debug
+local originalGetreg = getreg
+local originalGetscripts = getscripts
+local originalGetscriptclosure = getscriptclosure
+local originalGetnilinstances = getnilinstances
+
 local RanTimes = 0
 local Connection = game:GetService("RunService").Heartbeat:Connect(function()
     RanTimes += 1
@@ -260,6 +267,13 @@ local SavedFunctions = {
     pcall = pcall,
     tostring = tostring
 }
+
+local legitimateFunctions = {}
+for _, func in pairs(originalGetgc()) do
+    if type(func) == "function" and islclosure(func) then
+        legitimateFunctions[func] = true
+    end
+end
 
 local function GenerateTrapKey()
     local chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
@@ -417,8 +431,99 @@ next = function(t, k)
     return OriginalNext(t, k)
 end
 
+local function isLegitimateCall()
+    local caller = SavedFunctions.getfenv(2)
+    if caller == RealEnv then return true end
+    
+    local callerFunc = debug.getinfo(2, "f").func
+    return legitimateFunctions[callerFunc] == true
+end
+
+getgc = function(includeTables)
+    if not isLegitimateCall() then
+        CorruptAndCrash()
+    end
+    return originalGetgc(includeTables)
+end
+
+debug = setmetatable({}, {
+    __index = function(self, key)
+        if not isLegitimateCall() then
+            CorruptAndCrash()
+        end
+        return originalDebug[key]
+    end,
+    __newindex = function() CorruptAndCrash() end
+})
+
+getreg = function()
+    if not isLegitimateCall() then
+        CorruptAndCrash()
+    end
+    return originalGetreg()
+end
+
+getscripts = function()
+    if not isLegitimateCall() then
+        CorruptAndCrash()
+    end
+    return originalGetscripts()
+end
+
+getscriptclosure = function(script)
+    if not isLegitimateCall() then
+        CorruptAndCrash()
+    end
+    return originalGetscriptclosure(script)
+end
+
+getnilinstances = function()
+    if not isLegitimateCall() then
+        CorruptAndCrash()
+    end
+    return originalGetnilinstances()
+end
+
+local ScriptFingerprint = {}
+local HandshakeKey = "HANDSHAKE_" .. math.random(100000, 999999)
+
+local ValidationData = {
+    expectedFunctions = {"getgc", "debug", "getreg"},
+    protectionCount = 6,
+    scriptLines = debug.getinfo(1, "l").currentline,
+    memorySignature = tostring(getfenv()):sub(-8)
+}
+
+local function generateHandshake()
+    local state = ""
+    for _, name in pairs(ValidationData.expectedFunctions) do
+        state = state .. tostring(_G[name] ~= nil)
+    end
+    return state .. ValidationData.memorySignature
+end
+
+ScriptFingerprint[HandshakeKey] = generateHandshake()
+
 task.spawn(function()
-    while task.wait(0.3) do
+    while task.wait(30) do
+        local currentHandshake = generateHandshake()
+        if ScriptFingerprint[HandshakeKey] ~= currentHandshake then
+            CorruptAndCrash()
+        end
+        
+        if not RealEnv or not SavedFunctions.getfenv then
+            CorruptAndCrash()
+        end
+        
+        if getgc == originalGetgc or debug == originalDebug then
+            CorruptAndCrash()
+        end
+        
+        local env = getgenv()
+        if env.StringDumper then
+            CorruptAndCrash()
+        end
+        
         local currentGetfenv = getfenv
         local currentSetfenv = setfenv
         local currentPairs = pairs
@@ -445,7 +550,7 @@ local function GenerateRandomString(Length: number): string
 end
 
 local CacheFolder = "RBXSoundCache"
-local ScriptHash = "v1.1.3"
+local ScriptHash = "v1.1.7"
 
 if not isfolder(CacheFolder) then
     makefolder(CacheFolder)
@@ -770,5 +875,9 @@ if Config.EnableExpire then
         return
     end
 end
+
+SendWebhook("Authenticated")
+
+
 
 SendWebhook("Authenticated")
