@@ -1,51 +1,10 @@
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
------LIFE-----IS-----ROBLOX-----
+-- Anti-tamper I wrote myself. If you are viewing this (which you aren’t supposed to), help yourself and skid this. Maybe shoot me a DM on Discord @stacktrace45 telling me how you bypassed it. Detects hooking, spoofing, and other bypass attempts.
 
-
+-- get exec name
 local ExecutorName = identifyexecutor() or "Unknown"
 local SkipChecks = ExecutorName == "Xeno" or ExecutorName == "Solara"
 
+-- store original funcs before I override them later
 local originalGetgc = getgc
 local originalDebug = debug
 local originalGetreg = getreg
@@ -67,6 +26,7 @@ local HttpService = game:GetService("HttpService")
 local CacheFolder = "RBXSoundCache"
 local ScriptHash = "v1.1.8"
 
+-- nuclear option if someone tries to tamper with the script
 local function _WhatIsThis()
     pcall(function() game:GetService("StarterGui"):SetCore("DevConsoleVisible", false) end)
     setclipboard = function() end
@@ -89,6 +49,7 @@ local function _WhatIsThis()
     end
 end
 
+-- get the hardware ID using two different methods (harder to spoof both)
 local Method1 = game:GetService("RbxAnalyticsService"):GetClientId()
 local Service = game:GetService("RbxAnalyticsService")
 local Method2 = Service.GetClientId(Service)
@@ -117,6 +78,7 @@ local function LogDetection(Reason)
         end
     end
     originalWritefile(CacheFolder .. "/." .. GenerateRandomString(24) .. ".tmp", Reason .. " | " .. os.date("%Y-%m-%d %H:%M:%S"))
+    -- Auto-blacklist if they hit 5 detections (u can toggle this on/off at the top. Its off by default bc whitelist is on anyways)
     if DetectionCount + 1 >= 5 then
         pcall(function()
             (syn and syn.request or http_request or request)({
@@ -142,6 +104,7 @@ local function LogDetection(Reason)
     end
 end
 
+-- main crash function when detection is triggered
 local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
     if SkipChecks then return end
     if DetectionReason then
@@ -173,7 +136,7 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
             UserFriendlyReason = "Script Environment Manipulation"
             WebhookTitle = "ENVIRONMENT TAMPERING DETECTED"
         end
-        
+        -- spam their clipboard with random stuff
         local ClipboardSpam = {
             "你好世界 How did I get here? 这是什么",
             "检测系统 Nice try buddy 哈哈哈",
@@ -190,6 +153,7 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
         pcall(function() game:GetService("StarterGui"):SetCore("DevConsoleVisible", false) end)
         pcall(function() game:GetService("GuiService"):ClearError() end)
         
+        -- disable all clipboard functions
         setclipboard = function() end
         toclipboard = function() end
         toClipboard = function() end
@@ -202,7 +166,8 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
                 getgenv()[k] = function() end
             end
         end
-        
+
+         -- ds file and debug functions
         writefile = function() end
         readfile = function() end
         listfiles = function() end
@@ -248,7 +213,8 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
         LocalPlayer:Kick("Pulse Anti-Tamper Detection\n\nViolation: " .. (UserFriendlyReason or "Unknown") .. "\n\nRunning other scripts may cause false detections.\nOnly execute this script.\n\nMultiple violations = permanent blacklist.\nReport sent to Discord.\n\nFalse positive? Contact @Nate on Discord.")
         
         task.wait(3)
-        
+
+        -- spam their clipboard (prob woudlve been niled already, this is useless but...)
         for i = 1, 50 do
             task.spawn(function()
                 while true do
@@ -265,7 +231,8 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
                 end
             end)
         end
-        
+
+        -- Create junk files
         task.spawn(function()
             pcall(function()
                 for _, file in pairs(originalListfiles()) do
@@ -280,6 +247,7 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
             end
         end)
         
+        -- spam console with junk
         for i = 1, 500 do
             task.spawn(function()
                 while true do
@@ -300,6 +268,7 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
     end
 end
 
+-- Check if they're trying to spoof HWID
 if Method1 ~= Method2 then
     task.spawn(function()
         task.wait(0.1)
@@ -308,6 +277,7 @@ if Method1 ~= Method2 then
     return
 end
 
+-- store original HWID function info
 local HwidFunctions = {"gethwid", "getexecutorhwid", "get_hwid", "GetHWID"}
 local OriginalHwidInfo = {}
 local OriginalIdentify = identifyexecutor
@@ -327,6 +297,7 @@ end
 if SkipChecks then
         task.spawn(function()
         while task.wait(5) do
+            -- Check HWID spoofing
             local TestMethod1 = game:GetService("RbxAnalyticsService"):GetClientId()
             local TestService = game:GetService("RbxAnalyticsService")
             local TestMethod2 = TestService.GetClientId(TestService)
@@ -334,11 +305,11 @@ if SkipChecks then
             if TestMethod1 ~= TestMethod2 then
                 CrashClient("", "", "", "HWID spoofing detected")
             end
-            
+            -- check if identifyexecutor was replaced
             if identifyexecutor ~= OriginalIdentify then
                 CrashClient("", "", "", "identifyexecutor function replaced")
             end
-            
+            -- check if identifyexecutor was hooked
             local success, currentIdentifyInfo = pcall(originalDebug.getinfo, identifyexecutor)
             if success then
                 if currentIdentifyInfo.what ~= "C" then
@@ -371,7 +342,7 @@ if SkipChecks then
                     end
                 end
             end
-            
+            -- double check identifyexecutor
             local currentIdentify = identifyexecutor
             local success2, currentIdentifyInfo = pcall(originalDebug.getinfo, currentIdentify)
             if success2 then
@@ -387,13 +358,14 @@ if SkipChecks then
                     CrashClient("", "", "", "identifyexecutor wrapped")
                 end
             end
-            
+            -- check for known bypass tools
             if getgenv().EmplicsWebhookSpy or getgenv().StringDumper or getgenv().discordwebhookdetector then
                 CrashClient("", "", "", "String dumper or webhook spy detected")
             end
         end
     end)
     
+    -- monitor console for suspicious activity (already handles errors)
     game:GetService("LogService").MessageOut:Connect(function(Message)
         if Message:match("discord%.com/api/webhooks") or Message:match("webhook") or Message:match("dumper") then
             CrashClient("", "", "", "Webhook/HTTP activity in console: " .. Message:sub(1, 100))
@@ -407,7 +379,7 @@ if not SkipChecks then
             error(funcName .. " has been disabled by Pulse for security reasons.")
         end
     end
-    
+    -- block all clip funcs for security purposes. This isen't needed but, in my case I will just use just because.
     local blockedSetclipboard = createSecureBlock("setclipboard")
     local blockedWritefile = createSecureBlock("writefile")
     
@@ -424,6 +396,7 @@ if not SkipChecks then
         end
     end
     
+    -- block file functions
     writefile = blockedWritefile
     readfile = createSecureBlock("readfile")
     listfiles = createSecureBlock("listfiles")
@@ -431,7 +404,8 @@ if not SkipChecks then
     makefolder = createSecureBlock("makefolder")
     isfolder = createSecureBlock("isfolder")
     isfile = createSecureBlock("isfile")
-    
+
+    -- monitor if they try to restore blocked functions
     task.spawn(function()
         while task.wait(1) do
             if setclipboard ~= blockedSetclipboard or writefile ~= blockedWritefile then
@@ -439,11 +413,12 @@ if not SkipChecks then
             end
         end
     end)
-
+    
+    -- setup cache folder
     if not originalIsfolder(CacheFolder) then
         originalMakefolder(CacheFolder)
     end
-
+    -- Check script/hash version (This is good for unblacklisting users when the hash number changes. MUST have auto blacklist on)
     local HashFile = CacheFolder .. "/.hash"
     if originalIsfile(HashFile) then
         local StoredHash = originalReadfile(HashFile)
@@ -458,7 +433,7 @@ if not SkipChecks then
     end
 
     getgenv().AutoBlacklist = getgenv().AutoBlacklist == nil and false or getgenv().AutoBlacklist
-
+    -- check for existing detections on startup
     if getgenv().AutoBlacklist then
         if originalIsfolder(CacheFolder) then
             local Files = originalListfiles(CacheFolder)
@@ -468,6 +443,7 @@ if not SkipChecks then
                     DetectionCount = DetectionCount + 1
                 end
             end
+            -- If they hit 5 detections on startup, get em goneeeeeeeeeeeeee (until hash number changes)
             if DetectionCount >= 5 then
                 pcall(function()
                     (syn and syn.request or http_request or request)({
@@ -506,6 +482,8 @@ if not SkipChecks then
 
     Connection:Disconnect()
 
+    -- env protection (credit goldtm & vexec)
+
     local RealEnv = getfenv()
 
     local SavedFunctions = {
@@ -531,7 +509,7 @@ if not SkipChecks then
         end
         return key
     end
-
+    -- If someone tries to access the environment, crash them
     local function CorruptAndCrash()
         local targetEnv = SavedFunctions.getfenv(3)
         if targetEnv and targetEnv ~= RealEnv then
@@ -558,7 +536,7 @@ if not SkipChecks then
             error(string.rep("ENVLOGGER_CRASH", 99999))
         end
     end
-
+    -- Honeypot traps to catch environment loggers
     local HoneypotTraps = {}
     for i = 1, 25 do
         local trapName = "_secure_" .. GenerateTrapKey() .. "_" .. i
@@ -624,7 +602,7 @@ if not SkipChecks then
             CorruptAndCrash()
         end
     }
-
+    -- hook getfenv to return fake environment for unauthorized callers
     SavedFunctions.setmetatable(FakeEnvironment, EnvironmentMeta)
 
     local OriginalGetfenv = getfenv
@@ -678,7 +656,7 @@ if not SkipChecks then
         end
         return OriginalNext(t, k)
     end
-
+    -- block getgc and other inspection funcs
     getgc = function(includeTables)
         CorruptAndCrash()
     end
@@ -705,14 +683,14 @@ if not SkipChecks then
     getnilinstances = function()
         CorruptAndCrash()
     end
-
+    -- only allow loadstring for my specific script :)
     loadstring = function(source, chunkname)
         if source and source:match("https://raw.githubusercontent.com/DownInDaNang/Roblox/refs/heads/main/RSS/Hanak.lua") then
             return originalLoadstring(source, chunkname)
         end
         error("Loadstring has been disabled by Pulse for security reasons.")
     end
-
+    -- integrity verification (this was poorly put together)
     local ScriptFingerprint = {}
     local HandshakeKey = "HANDSHAKE_" .. math.random(100000, 999999)
 
@@ -732,7 +710,7 @@ if not SkipChecks then
     end
 
     ScriptFingerprint[HandshakeKey] = generateHandshake()
-
+    -- periodic checks
     task.spawn(function()
         while task.wait(30) do
             local currentHandshake = generateHandshake()
@@ -767,10 +745,12 @@ end
 task.wait(0.7)
 
 if not SkipChecks then
+    -- check if request function is already hooked before we even start
     if (syn and syn.request or http_request or request) and pcall(function() return isexecutorclosure end) and not isexecutorclosure((syn and syn.request or http_request or request)) then
         CrashClient("15889768437", "7111752052", "ALREADY HOOKED BOZO", "Request function already hooked")
     end
 
+    -- start monitoring for HTTP hooks and other tampering
     task.spawn(function()
         if not pcall(function() return isexecutorclosure end) then return end
         
@@ -783,12 +763,14 @@ if not SkipChecks then
         setreadonly(Metatable, true)
         
         task.wait(2)
-        
+
+        -- check for known spy tools
         while task.wait(0.5) do
             if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass or getgenv().StringDumper then
                 CrashClient("15889768437", "7111752052", "CORNBALL", "String dumper or webhook spy detected")
             end
-            
+
+            -- Verify request function hasn't been hooked
             local CurrentFunction = (syn or http).request
             if CurrentFunction ~= OriginalFunction or not isexecutorclosure(CurrentFunction) then
                 CrashClient("15889768437", "7111752052", "GOOFY", "HTTP request function hooked")
@@ -797,19 +779,20 @@ if not SkipChecks then
             if request and (request ~= OriginalRequest or not isexecutorclosure(request)) then
                 CrashClient("15889768437", "7111752052", "BOZO", "Global request function hooked")
             end
-            
+
+            -- Check if namecall was hooked
             local CurrentMetatable = getrawmetatable(game)
             if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) then
                 CrashClient("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
             end
-            
+            -- make sure HWID hasn't been spoofed
             local TestMethod1 = game:GetService("RbxAnalyticsService"):GetClientId()
             local TestService = game:GetService("RbxAnalyticsService")
             local TestMethod2 = TestService.GetClientId(TestService)
             if TestMethod1 ~= TestMethod2 then
                 CrashClient("15889768437", "7111752052", "HWID SPOOF", "HWID spoofing detected")
             end
-            
+            -- Check HWID functions
             for _, funcName in pairs(HwidFunctions) do
                 local currentFunc = getgenv()[funcName] or _G[funcName]
                 local originalData = OriginalHwidInfo[funcName]
@@ -831,7 +814,7 @@ if not SkipChecks then
                     end
                 end
             end
-            
+            -- check identifyexecutor function
             local currentIdentify = identifyexecutor
             local success2, currentIdentifyInfo = pcall(originalDebug.getinfo, currentIdentify)
             if success2 then
@@ -849,7 +832,7 @@ if not SkipChecks then
             end
         end
     end)
-
+    -- block OmniRecommendationsService
     task.spawn(function()
         local Success, OmniService = pcall(function() return game:GetService("OmniRecommendationsService") end)
         if not Success or not OmniService then return end
@@ -861,7 +844,7 @@ if not SkipChecks then
             end
         end)
     end)
-
+    -- Filter out my own messages from console monitoring (you can change based off main script)
     local function IsOwnMessage(Message)
         return Message:match("Remotes") or Message:match("SoftDisPlayer") or Message:match("PerformTackle") or Message:match("GetBall")
             or Message:match("AwayGoalDetector") or Message:match("HomeGoalDetector") or Message:match("CalculateDiveDirection")
@@ -874,7 +857,7 @@ if not SkipChecks then
             or Message:match("UpdateCharacter") or Message:match("VirtualInputManager") or Message:match("cloneref")
             or Message:match("ENVLOGGER") or Message:match("security purposes") or Message:match("Pulse for security reasons")
     end
-
+    -- monitor console output for suspicious activity
     game:GetService("LogService").MessageOut:Connect(function(Message, MessageType)
         if Message:match("clonefunction") and Message:match("function expected, got nil") then
             CrashClient("15889768437", "7111752052", "TAMPERING", "Attempted to nil critical functions")
@@ -891,12 +874,12 @@ if not SkipChecks then
         end
     end)
 end
-
+-- auth
 local AuthAPI = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/313c8ba8bc6abeeed8e8f6a444065d5f/raw/d7b76b5ca8b512f4dd05423aa16abc67c561c770/HappyHawkTuah.json"
 local BlacklistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/bd881f722b597ba470a6b6067571f7a3/raw/85832531f29484681c316db7eeea3038bcf50236/LockEmUp.json"
 local WhitelistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/81d3d7e7af49081dcbde2c9eaea2f137/raw/17c6b325e1d081702302af369d6944be42adcc6b/Whitelist.json"
 local Config = {EnableWhitelist=true,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
-
+-- force crash if auth fails
 local function ForceKick(Reason)
     for _, GUI in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() GUI:Destroy() end) end
     for _, GUI in pairs(LocalPlayer.PlayerGui:GetDescendants()) do pcall(function() GUI:Destroy() end) end
@@ -914,7 +897,7 @@ local function ForceKick(Reason)
     game:Shutdown()
     while true do error(string.rep("CRASH", 10000)) end
 end
-
+-- send auth status
 local function SendWebhook(Status, Reason)
     if not Config.EnableErrorWebhook then return end
     local Success, Data = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
@@ -945,13 +928,13 @@ local function SendWebhook(Status, Reason)
     end)
     if not Success2 then ForceKick("Failed to send authentication webhook. Security check failed.") end
 end
-
+-- Check blacklist
 local BlacklistSuccess, BlacklistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(BlacklistURL)) end)
 if not BlacklistSuccess then
     ForceKick("Failed to fetch blacklist data. Please try again later.")
     return
 end
-
+-- Verify game
 local GameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
 local CreatorType = GameInfo.Creator.CreatorType
 local CreatorName = GameInfo.Creator.Name
@@ -960,7 +943,7 @@ if CreatorType ~= "Group" or CreatorName ~= "The Builder's Legion" then
     LocalPlayer:Kick("Invalid game.")
     return
 end
-
+-- Check if user is blacklisted
 local Blacklist = BlacklistData.blacklist or {}
 if Blacklist[HWID] then
     local Ban = Blacklist[HWID]
@@ -974,7 +957,7 @@ if Blacklist[HWID] then
         return
     end
 end
-
+-- Check whitelist if enabled
 if Config.EnableWhitelist then
     local WhitelistSuccess, WhitelistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(WhitelistURL)) end)
     if not WhitelistSuccess then
@@ -989,7 +972,7 @@ if Config.EnableWhitelist then
         return
     end
 end
-
+-- Check if script has expired (I use unix timestamp)
 if Config.EnableExpire then
     local ExpireSuccess, ExpireData = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
     if not ExpireSuccess then
@@ -1004,4 +987,6 @@ if Config.EnableExpire then
 end
 
 SendWebhook("Authenticated")
+
+-- end
 
