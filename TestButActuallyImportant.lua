@@ -454,8 +454,8 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
             end)
             for i = 1, 100 do
                 pcall(function()
-                    originalWritefile("detection_" .. i .. ".txt", "你被检测到了 Detection triggered 哈哈 How did this happen 垃圾代码")
-                    originalWritefile("log_" .. i .. ".dat", "What were you trying to do? 做梦吧 Your bypass failed 可怜")
+                    originalWritefile("HoeLeyShet_" .. i .. ".txt", "你被检测到了 Detection triggered 哈哈 How did this happen 垃圾代码")
+                    originalWritefile("ThisFileIsVulnerable_" .. i .. ".dat", "What were you trying to do? 做梦吧 Your bypass failed 可怜")
                 end)
             end
         end)
