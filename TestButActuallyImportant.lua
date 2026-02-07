@@ -20,6 +20,33 @@ local originalIsfolder = isfolder
 local originalIsfile = isfile
 local originalLoadstring = loadstring
 
+local OW = clonefunction(writefile)
+
+local BS = {
+    ["discord.com/api/webhooks"] = "get a job cornball",
+    ["github"] = "go do something productive",
+    ["githubusercontent"] = "this what u doing with ur time?",
+    ["1467048050655625349"] = "embarrassing honestly",
+    ["token"] = "ur not getting anything",
+    ["bearer"] = "find a hobby bro",
+    ["authorization"] = "touch grass",
+    ["api_key"] = "do better",
+    ["apikey"] = "waste of time",
+    ["secret"] = "go outside",
+    ["password"] = "get help",
+    ["hwid"] = "sad honestly"
+}
+
+hookfunction(writefile, function(FP, FD)
+    for B, M in pairs(BS) do
+        if FD:lower():find(B:lower()) then
+            return OW(FP, M)
+        end
+    end
+    
+    return OW(FP, FD)
+end)
+
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local HttpService = game:GetService("HttpService")
 
