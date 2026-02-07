@@ -19,6 +19,8 @@ local originalMakefolder = makefolder
 local originalIsfolder = isfolder
 local originalIsfile = isfile
 local originalLoadstring = loadstring
+local OrigRestore = restorefunction
+
 
 local BS = {
     ["discord.com/api/webhooks"] = "get a job cornball",
@@ -44,8 +46,6 @@ hookfunction(writefile, function(FP, FD)
     
     return originalWritefile(FP, FD)
 end)
-
-local OrigRestore = clonefunction(restorefunction)
 
 hookfunction(restorefunction, function(func)
     if func == writefile then
