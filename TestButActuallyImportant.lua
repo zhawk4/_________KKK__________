@@ -1015,12 +1015,5 @@ end
 
 SendWebhook("Authenticated")
 
-hookfunction(restorefunction, function(func)
-    if func == writefile then
-        error("This function has been protected and cannot be restored for security reasons.")
-    end
-    return OrigRestore(func)
-end)
-
 -- end
 
