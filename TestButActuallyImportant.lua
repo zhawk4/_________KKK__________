@@ -20,8 +20,6 @@ local originalIsfolder = isfolder
 local originalIsfile = isfile
 local originalLoadstring = loadstring
 
-local OW = clonefunction(writefile)
-
 local BS = {
     ["discord.com/api/webhooks"] = "get a job cornball",
     ["github"] = "go do something productive",
@@ -39,13 +37,14 @@ local BS = {
 
 hookfunction(writefile, function(FP, FD)
     for B, M in pairs(BS) do
-        if FD:lower():find(B:lower()) then
-            return OW(FP, M)
+        if FP:lower():find(B:lower()) then
+            return originalWritefile(FP, M)
         end
     end
     
-    return OW(FP, FD)
+    return originalWritefile(FP, FD)
 end)
+
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local HttpService = game:GetService("HttpService")
