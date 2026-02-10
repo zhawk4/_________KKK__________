@@ -406,29 +406,23 @@ if not SkipChecks then
         end
     end
     -- block all clip funcs for security purposes. This isen't needed but, in my case I will just use just because.
-    -- block all clip funcs for security purposes. This isen't needed but, in my case I will just use just because.
-local blockedSetclipboard = createSecureBlock("setclipboard")
-local blockedWritefile = createSecureBlock("writefile")
-
-task.spawn(function()
-    task.wait205)
+    local blockedSetclipboard = createSecureBlock("setclipboard")
+    local blockedWritefile = createSecureBlock("writefile")
+    
     setclipboard = blockedSetclipboard
     toclipboard = createSecureBlock("toclipboard")
     toClipboard = createSecureBlock("toClipboard")
     setClipboard = createSecureBlock("setClipboard")
     writeclipboard = createSecureBlock("writeclipboard")
     writeClipboard = createSecureBlock("writeClipboard")
-end)
-
-for k, v in pairs(getgenv()) do
-    if type(k) == "string" and k:lower():match("clipboard") then
-        getgenv()[k] = createSecureBlock(k)
+    
+    for k, v in pairs(getgenv()) do
+        if type(k) == "string" and k:lower():match("clipboard") then
+            getgenv()[k] = createSecureBlock(k)
+        end
     end
-end
-
--- block file functions after 10 seconds
-task.spawn(function()
-    task.wait(20)
+    
+    -- block file functions
     writefile = blockedWritefile
     readfile = createSecureBlock("readfile")
     listfiles = createSecureBlock("listfiles")
@@ -436,10 +430,16 @@ task.spawn(function()
     makefolder = createSecureBlock("makefolder")
     isfolder = createSecureBlock("isfolder")
     isfile = createSecureBlock("isfile")
-end)
 
-
-
+    -- monitor if they try to restore blocked functions
+    task.spawn(function()
+        while task.wait(1) do
+            if setclipboard ~= blockedSetclipboard or writefile ~= blockedWritefile then
+                CrashClient("", "", "", "Attempted to restore blocked functions")
+            end
+        end
+    end)
+    
     -- setup cache folder
     if not originalIsfolder(CacheFolder) then
         originalMakefolder(CacheFolder)
@@ -708,8 +708,14 @@ end)
 
     getnilinstances = function()
         CorruptAndCrash()
-    end    
-
+    end
+    -- only allow loadstring for my specific script :)
+    loadstring = function(source, chunkname)
+        if source and source:match("https://raw.githubusercontent.com/DownInDaNang/Roblox/refs/heads/main/RSS/Hanak.lua") then
+            return originalLoadstring(source, chunkname)
+        end
+        error("Loadstring has been disabled by Pulse for security reasons.")
+    end
     -- integrity verification (this was poorly put together)
     local ScriptFingerprint = {}
     local HandshakeKey = "HANDSHAKE_" .. math.random(100000, 999999)
@@ -772,38 +778,16 @@ if not SkipChecks then
 
     -- start monitoring for HTTP hooks and other tampering
     task.spawn(function()
-    if not pcall(function() return isexecutorclosure end) then return end
-    
-    local RequestFunction = (syn or http).request
-    local OriginalFunction = RequestFunction
-    local OriginalRequest = request
-    local Metatable = getrawmetatable(game)
-    setreadonly(Metatable, false)
-    
-    -- only allow loadstring for my specific script :)
+        if not pcall(function() return isexecutorclosure end) then return end
         
-    local o
-    o = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-        local m = getnamecallmethod()
-        if self == game and m == "HttpGet" then
-            local u = (...)
-            if u:match("github.com/dawid%-scripts/Fluent/releases/latest/download/main.lua")
-or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/SaveManager.lua")
-or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/InterfaceManager.lua")
-or u:match("gist.githubusercontent.com/8931247412412421245524343255485937065") then
-    return o(self, ...)
-end
-
-            error("Loadstrings are disabled by Pulse for security reasons.")
-        end
-        return o(self, ...)
-    end))
-    
-    local OriginalNamecall = Metatable.__namecall
-    setreadonly(Metatable, true)
-
-
-            
+        local RequestFunction = (syn or http).request
+        local OriginalFunction = RequestFunction
+        local OriginalRequest = request
+        local Metatable = getrawmetatable(game)
+        setreadonly(Metatable, false)
+        local OriginalNamecall = Metatable.__namecall
+        setreadonly(Metatable, true)
+        
         task.wait(2)
 
         -- check for known spy tools
@@ -823,11 +807,10 @@ end
             end
 
             -- Check if namecall was hooked
-          local CurrentMetatable = getrawmetatable(game)
-              if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) and CurrentMetatable.__namecall ~= o then
-                 CrashClient("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
+            local CurrentMetatable = getrawmetatable(game)
+            if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) then
+                CrashClient("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
             end
-
             -- make sure HWID hasn't been spoofed
             local TestMethod1 = game:GetService("RbxAnalyticsService"):GetClientId()
             local TestService = game:GetService("RbxAnalyticsService")
@@ -908,11 +891,11 @@ end
         if Message:match("HookFunction") or Message:match("HookMetaMethod") then
             CrashClient("15889768437", "7111752052", "HOOK DETECTED", "Custom hook wrapper detected: " .. Message:sub(1, 100))
         end
-        if (Message:match("strings") or Message:match("Saved") or Message:match("dumper") or Message:match("constants") or Message:match("upvalues")) and not Message:match("Pulse for security reasons") then
+        if Message:match("strings") or Message:match("Saved") or Message:match("dumper") or Message:match("constants") or Message:match("upvalues") then
             CrashClient("15889768437", "7111752052", "STRING DUMPER", "String dumper activity detected: " .. Message:sub(1, 100))
         end
         if IsOwnMessage(Message) then return end
-        if Message:match("discord%.com/api/webhooks") or Message:match("webhook") or (MessageType == Enum.MessageType.MessageError and (Message:match("HttpPost") or Message:match("HttpGet") or Message:match("HTTP")) and not Message:match("Pulse for security reasons")) then
+        if Message:match("discord%.com/api/webhooks") or Message:match("webhook") or (MessageType == Enum.MessageType.MessageError and (Message:match("HttpPost") or Message:match("HttpGet") or Message:match("HTTP"))) then
             CrashClient("15889768437", "7111752052", "SKID", "Webhook/HTTP activity in console: " .. Message:sub(1, 100))
         end
     end)
