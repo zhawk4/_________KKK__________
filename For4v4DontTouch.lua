@@ -195,7 +195,7 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
         listfiles = function() end
         delfile = function() end
         makefolder = function() end
-        isfolder = function() end
+         = function() end
         isfile = function() end
         hookfunction = function() end
         hookmetamethod = function() end
@@ -404,40 +404,44 @@ if not SkipChecks then
             error(funcName .. " has been disabled by Pulse for security reasons.")
         end
     end
-    -- block all clip funcs for security purposes. This isen't needed but, in my case I will just use just because.
+    
     local blockedSetclipboard = createSecureBlock("setclipboard")
     local blockedWritefile = createSecureBlock("writefile")
     
-    setclipboard = blockedSetclipboard
-    toclipboard = createSecureBlock("toclipboard")
-    toClipboard = createSecureBlock("toClipboard")
-    setClipboard = createSecureBlock("setClipboard")
-    writeclipboard = createSecureBlock("writeclipboard")
-    writeClipboard = createSecureBlock("writeClipboard")
-    
-    for k, v in pairs(getgenv()) do
-        if type(k) == "string" and k:lower():match("clipboard") then
-            getgenv()[k] = createSecureBlock(k)
-        end
-    end
-    
-    -- block file functions
-    writefile = blockedWritefile
-    readfile = createSecureBlock("readfile")
-    listfiles = createSecureBlock("listfiles")
-    delfile = createSecureBlock("delfile")
-    makefolder = createSecureBlock("makefolder")
-    isfolder = createSecureBlock("isfolder")
-    isfile = createSecureBlock("isfile")
-
-    -- monitor if they try to restore blocked functions
     task.spawn(function()
+        task.wait(10)
+        
+        -- block all clip funcs for security purposes. This isen't needed but, in my case I will just use just because.
+        setclipboard = blockedSetclipboard
+        toclipboard = createSecureBlock("toclipboard")
+        toClipboard = createSecureBlock("toClipboard")
+        setClipboard = createSecureBlock("setClipboard")
+        writeclipboard = createSecureBlock("writeclipboard")
+        writeClipboard = createSecureBlock("writeClipboard")
+        
+        for k, v in pairs(getgenv()) do
+            if type(k) == "string" and k:lower():match("clipboard") then
+                getgenv()[k] = createSecureBlock(k)
+            end
+        end
+        
+        -- block file functions
+        writefile = blockedWritefile
+        readfile = createSecureBlock("readfile")
+        listfiles = createSecureBlock("listfiles")
+        delfile = createSecureBlock("delfile")
+        makefolder = createSecureBlock("makefolder")
+        isfolder = createSecureBlock("isfolder")
+        isfile = createSecureBlock("isfile")
+        
+        -- monitor if they try to restore blocked functions
         while task.wait(1) do
             if setclipboard ~= blockedSetclipboard or writefile ~= blockedWritefile then
                 CrashClient("", "", "", "Attempted to restore blocked functions")
             end
         end
     end)
+
     
     -- setup cache folder
     if not originalIsfolder(CacheFolder) then
