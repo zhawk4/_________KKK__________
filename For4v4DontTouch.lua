@@ -708,9 +708,7 @@ if not SkipChecks then
 
     getnilinstances = function()
         CorruptAndCrash()
-    end
-    -- only allow loadstring for my specific script :)
-    
+    end    
 
     -- integrity verification (this was poorly put together)
     local ScriptFingerprint = {}
@@ -782,6 +780,8 @@ if not SkipChecks then
     local Metatable = getrawmetatable(game)
     setreadonly(Metatable, false)
     
+    -- only allow loadstring for my specific script :)
+        
     local o
     o = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
         local m = getnamecallmethod()
@@ -823,10 +823,10 @@ end
             end
 
             -- Check if namecall was hooked
-local CurrentMetatable = getrawmetatable(game)
-if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) and CurrentMetatable.__namecall ~= o then
-    CrashClient("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
-end
+          local CurrentMetatable = getrawmetatable(game)
+              if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) and CurrentMetatable.__namecall ~= o then
+                 CrashClient("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
+            end
 
             -- make sure HWID hasn't been spoofed
             local TestMethod1 = game:GetService("RbxAnalyticsService"):GetClientId()
