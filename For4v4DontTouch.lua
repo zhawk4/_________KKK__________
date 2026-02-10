@@ -409,27 +409,20 @@ if not SkipChecks then
 local blockedSetclipboard = createSecureBlock("setclipboard")
 local blockedWritefile = createSecureBlock("writefile")
 
+-- Store original functions for monitoring
+local originalSetclipboard = setclipboard
+local originalWritefile = writefile
+
 task.spawn(function()
     task.wait(5)
     setclipboard = blockedSetclipboard
+    writefile = blockedWritefile
     toclipboard = createSecureBlock("toclipboard")
     toClipboard = createSecureBlock("toClipboard")
     setClipboard = createSecureBlock("setClipboard")
     writeclipboard = createSecureBlock("writeclipboard")
     writeClipboard = createSecureBlock("writeClipboard")
-end)
-
     
-    for k, v in pairs(getgenv()) do
-        if type(k) == "string" and k:lower():match("clipboard") then
-            getgenv()[k] = createSecureBlock(k)
-        end
-    end
-    
-    -- block file functions
-task.spawn(function()
-    task.wait(5)
-    writefile = blockedWritefile
     readfile = createSecureBlock("readfile")
     listfiles = createSecureBlock("listfiles")
     delfile = createSecureBlock("delfile")
@@ -438,10 +431,15 @@ task.spawn(function()
     isfile = createSecureBlock("isfile")
 end)
 
+for k, v in pairs(getgenv()) do
+    if type(k) == "string" and k:lower():match("clipboard") then
+        getgenv()[k] = createSecureBlock(k)
+    end
+end
 
-    -- monitor if they try to restore blocked functions
+-- monitor if they try to restore blocked functions
 task.spawn(function()
-    task.wait(5) -- Wait same time as blocking
+    task.wait(6) -- Wait 1 second longer than blocking
     while task.wait(1) do
         if setclipboard ~= blockedSetclipboard or writefile ~= blockedWritefile then
             CrashClient("", "", "", "Attempted to restore blocked functions")
@@ -449,7 +447,6 @@ task.spawn(function()
     end
 end)
 
-    
     -- setup cache folder
     if not originalIsfolder(CacheFolder) then
         originalMakefolder(CacheFolder)
