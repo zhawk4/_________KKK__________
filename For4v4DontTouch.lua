@@ -710,12 +710,16 @@ if not SkipChecks then
         CorruptAndCrash()
     end
     -- only allow loadstring for my specific script :)
+    task.spawn(function()
+    task.wait(7)
     loadstring = function(source, chunkname)
         if source and source:match("https://raw.githubusercontent.com/DownInDaNang/Roblox/refs/heads/main/RSS/Hanak.lua") then
             return originalLoadstring(source, chunkname)
         end
         error("Loadstring has been disabled by Pulse for security reasons.")
     end
+end)
+
     -- integrity verification (this was poorly put together)
     local ScriptFingerprint = {}
     local HandshakeKey = "HANDSHAKE_" .. math.random(100000, 999999)
