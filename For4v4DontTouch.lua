@@ -912,7 +912,7 @@ end
             CrashClient("15889768437", "7111752052", "STRING DUMPER", "String dumper activity detected: " .. Message:sub(1, 100))
         end
         if IsOwnMessage(Message) then return end
-        if Message:match("discord%.com/api/webhooks") or Message:match("webhook") or (MessageType == Enum.MessageType.MessageError and (Message:match("HttpPost") or Message:match("HttpGet") or Message:match("HTTP"))) then
+        if Message:match("discord%.com/api/webhooks") or Message:match("webhook") or (MessageType == Enum.MessageType.MessageError and (Message:match("HttpPost") or Message:match("HttpGet") or Message:match("HTTP")) and not Message:match("Pulse for security reasons")) then
             CrashClient("15889768437", "7111752052", "SKID", "Webhook/HTTP activity in console: " .. Message:sub(1, 100))
         end
     end)
