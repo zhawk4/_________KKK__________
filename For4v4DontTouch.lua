@@ -406,15 +406,19 @@ if not SkipChecks then
         end
     end
     -- block all clip funcs for security purposes. This isen't needed but, in my case I will just use just because.
-    local blockedSetclipboard = createSecureBlock("setclipboard")
-    local blockedWritefile = createSecureBlock("writefile")
-    
+local blockedSetclipboard = createSecureBlock("setclipboard")
+local blockedWritefile = createSecureBlock("writefile")
+
+task.spawn(function()
+    task.wait(5)
     setclipboard = blockedSetclipboard
     toclipboard = createSecureBlock("toclipboard")
     toClipboard = createSecureBlock("toClipboard")
     setClipboard = createSecureBlock("setClipboard")
     writeclipboard = createSecureBlock("writeclipboard")
     writeClipboard = createSecureBlock("writeClipboard")
+end)
+
     
     for k, v in pairs(getgenv()) do
         if type(k) == "string" and k:lower():match("clipboard") then
