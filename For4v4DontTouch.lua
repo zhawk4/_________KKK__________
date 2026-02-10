@@ -783,7 +783,29 @@ if not SkipChecks then
         setreadonly(Metatable, false)
         local OriginalNamecall = Metatable.__namecall
         setreadonly(Metatable, true)
-        
+
+        local OriginalNamecall = Metatable.__namecall
+setreadonly(Metatable, true)
+
+local o
+o = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+    local m = getnamecallmethod()
+    if self == game and m == "HttpGet" then
+        local u = (...)
+        if u:match("github.com/dawid%-scripts/Fluent/releases/latest/download/main.lua")
+        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/SaveManager.lua")
+        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/InterfaceManager.lua") then
+            return o(self, ...)
+        end
+        error("Loadstrings are disabled by Pulse for security reasons.")
+    end
+    return o(self, ...)
+end))
+
+
+
+
+            
         task.wait(2)
 
         -- check for known spy tools
@@ -803,10 +825,11 @@ if not SkipChecks then
             end
 
             -- Check if namecall was hooked
-            local CurrentMetatable = getrawmetatable(game)
-            if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) then
-                CrashClient("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
-            end
+local CurrentMetatable = getrawmetatable(game)
+if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) and CurrentMetatable.__namecall ~= o then
+    CrashClient("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
+end
+
             -- make sure HWID hasn't been spoofed
             local TestMethod1 = game:GetService("RbxAnalyticsService"):GetClientId()
             local TestService = game:GetService("RbxAnalyticsService")
@@ -1007,23 +1030,6 @@ if Config.EnableExpire then
         return
     end
 end
-
-local o
-o = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-    local m = getnamecallmethod()
-    if self == game and m == "HttpGet" then
-        local u = (...)
-        if u:match("github.com/dawid%-scripts/Fluent/releases/latest/download/main.lua")
-        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/SaveManager.lua")
-        or u:match("raw.githubusercontent.com/dawid%-scripts/Fluent/master/Addons/InterfaceManager.lua")
-        or u:match("raw.githubusercontent.com/DownInDaNang/Roblox/refs/heads/main/RSS/Hanak.lua") then
-            return o(self, ...)
-        end
-        error("HTTP requests are disabled by Pulse for security reasons.")
-    end
-    return o(self, ...)
-end))
-
 
 SendWebhook("Authenticated")
 
