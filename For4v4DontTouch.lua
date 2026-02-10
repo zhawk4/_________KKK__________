@@ -428,7 +428,7 @@ end
 
 -- block file functions after 10 seconds
 task.spawn(function()
-    task.wait(10)
+    task.wait(20)
     writefile = blockedWritefile
     readfile = createSecureBlock("readfile")
     listfiles = createSecureBlock("listfiles")
