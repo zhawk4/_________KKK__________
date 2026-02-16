@@ -1,6 +1,3 @@
-
--- Anti-tamper I wrote. If you are viewing this (which you aren’t supposed to), help yourself and skid this. Maybe shoot me a DM on Discord @stacktrace45 telling me how you bypassed it. Detects hooking, spoofing, and other bypass attempts.
-
 -- get exec name
 local ExecutorName = identifyexecutor() or "Unknown"
 local SkipChecks = ExecutorName == "Xeno" or ExecutorName == "Solara"
@@ -19,6 +16,7 @@ local originalDelfile = delfile
 local originalMakefolder = makefolder
 local originalIsfolder = isfolder
 local originalIsfile = isfile
+local originalLoadstring = loadstring
 local OrigRestore = clonefunction(restorefunction)
 
 
@@ -195,7 +193,6 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
         listfiles = function() end
         delfile = function() end
         makefolder = function() end
-         = function() end
         isfile = function() end
         hookfunction = function() end
         hookmetamethod = function() end
@@ -205,6 +202,7 @@ local function CrashClient(ImageID, SoundID, DisplayText, DetectionReason)
         getscripts = function() end
         getscriptclosure = function() end
         getnilinstances = function() end
+        loadstring = function() end
         
         pcall(function()
             (syn and syn.request or http_request or request)({
@@ -713,7 +711,13 @@ end)
     getnilinstances = function()
         CorruptAndCrash()
     end
-   
+    -- only allow loadstring for my specific script :)
+    loadstring = function(source, chunkname)
+        if source and source:match("https://raw.githubusercontent.com/DownInDaNang/Roblox/refs/heads/main/RSS/Hanak.lua") then
+            return originalLoadstring(source, chunkname)
+        end
+        error("Loadstring has been disabled by Pulse for security reasons.")
+    end
     -- integrity verification (this was poorly put together)
     local ScriptFingerprint = {}
     local HandshakeKey = "HANDSHAKE_" .. math.random(100000, 999999)
@@ -764,7 +768,7 @@ end)
             end
         end
     end)
-end
+
 
 task.wait(0.7)
 
