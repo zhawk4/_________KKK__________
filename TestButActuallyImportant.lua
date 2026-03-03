@@ -865,7 +865,7 @@ end)
 local AuthAPI = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/313c8ba8bc6abeeed8e8f6a444065d5f/raw/d7b76b5ca8b512f4dd05423aa16abc67c561c770/HappyHawkTuah.json"
 local BlacklistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/bd881f722b597ba470a6b6067571f7a3/raw/85832531f29484681c316db7eeea3038bcf50236/LockEmUp.json"
 local WhitelistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/81d3d7e7af49081dcbde2c9eaea2f137/raw/1b48f36d6ef614e370b70424639c69822b4057d7/Whitelist.json"
-local Config = {EnableWhitelist=true,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
+local Config = {EnableWhitelist=false,EnableHWID=false,EnableExpire=true,EnableErrorWebhook=true}
 
 local function ForceKick(Reason: string)
     for _, GUI in pairs(game:GetService("CoreGui"):GetDescendants()) do pcall(function() GUI:Destroy() end) end
