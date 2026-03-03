@@ -1,9 +1,142 @@
+if getgenv().PulseAuthLoaded then
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Notice!",
+        Text = "Script has already been executed.",
+        Duration = 4
+    })
+    return
+end
+getgenv().PulseAuthLoaded = true
+
 local ExecutorName = identifyexecutor() or "Unknown"
 
 if ExecutorName == "Xeno" or ExecutorName == "Solara" then
     game:GetService("Players").LocalPlayer:Kick("Unsupported executor.\n\nXeno and Solara are not supported.\nPlease use a different executor.")
     return
 end
+
+local ScreenGui = Instance.new("ScreenGui")
+local Blur = Instance.new("BlurEffect")
+local Main = Instance.new("Frame")
+local Corner = Instance.new("UICorner")
+local OuterGlow = Instance.new("Frame")
+local GlowCorner = Instance.new("UICorner")
+local Content = Instance.new("Frame")
+local Brand = Instance.new("TextLabel")
+local Divider = Instance.new("Frame")
+local StatusDot = Instance.new("Frame")
+local DotCorner = Instance.new("UICorner")
+local StatusText = Instance.new("TextLabel")
+local ProgressTrack = Instance.new("Frame")
+local TrackCorner = Instance.new("UICorner")
+local ProgressFill = Instance.new("Frame")
+local FillCorner = Instance.new("UICorner")
+local ExecutorChip = Instance.new("Frame")
+local ChipCorner = Instance.new("UICorner")
+local ChipText = Instance.new("TextLabel")
+local Border = Instance.new("UIStroke")
+
+ScreenGui.Parent = gethui()
+ScreenGui.ResetOnSpawn = false
+
+Blur.Parent = game.Lighting
+Blur.Size = 10
+
+OuterGlow.Parent = ScreenGui
+OuterGlow.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
+OuterGlow.Position = UDim2.new(0.5, -153, 0.5, -78)
+OuterGlow.Size = UDim2.new(0, 306, 0, 156)
+OuterGlow.BorderSizePixel = 0
+OuterGlow.BackgroundTransparency = 0.4
+
+GlowCorner.CornerRadius = UDim.new(0, 14)
+GlowCorner.Parent = OuterGlow
+
+Main.Parent = ScreenGui
+Main.BackgroundColor3 = Color3.fromRGB(14, 14, 18)
+Main.Position = UDim2.new(0.5, -150, 0.5, -75)
+Main.Size = UDim2.new(0, 300, 0, 150)
+Main.BorderSizePixel = 0
+
+Corner.CornerRadius = UDim.new(0, 12)
+Corner.Parent = Main
+
+Border.Parent = Main
+Border.Color = Color3.fromRGB(28, 28, 35)
+Border.Thickness = 0.8
+
+Content.Parent = Main
+Content.BackgroundTransparency = 1
+Content.Position = UDim2.new(0, 28, 0, 24)
+Content.Size = UDim2.new(1, -56, 1, -48)
+
+Brand.Parent = Content
+Brand.BackgroundTransparency = 1
+Brand.Size = UDim2.new(1, 0, 0, 24)
+Brand.Font = Enum.Font.Code
+Brand.Text = "AUTH"
+Brand.TextColor3 = Color3.fromRGB(245, 245, 250)
+Brand.TextSize = 17
+Brand.TextXAlignment = Enum.TextXAlignment.Left
+
+Divider.Parent = Content
+Divider.BackgroundColor3 = Color3.fromRGB(65, 135, 255)
+Divider.Position = UDim2.new(0, 0, 0, 32)
+Divider.Size = UDim2.new(0, 38, 0, 1)
+Divider.BorderSizePixel = 0
+
+StatusDot.Parent = Content
+StatusDot.BackgroundColor3 = Color3.fromRGB(255, 95, 75)
+StatusDot.Position = UDim2.new(0, 0, 0, 52)
+StatusDot.Size = UDim2.new(0, 7, 0, 7)
+StatusDot.BorderSizePixel = 0
+
+DotCorner.CornerRadius = UDim.new(1, 0)
+DotCorner.Parent = StatusDot
+
+StatusText.Parent = Content
+StatusText.BackgroundTransparency = 1
+StatusText.Position = UDim2.new(0, 16, 0, 49)
+StatusText.Size = UDim2.new(1, -16, 0, 13)
+StatusText.Font = Enum.Font.Code
+StatusText.Text = "Initializing"
+StatusText.TextColor3 = Color3.fromRGB(175, 175, 180)
+StatusText.TextSize = 11
+StatusText.TextXAlignment = Enum.TextXAlignment.Left
+
+ProgressTrack.Parent = Content
+ProgressTrack.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+ProgressTrack.Position = UDim2.new(0, 0, 0, 76)
+ProgressTrack.Size = UDim2.new(1, 0, 0, 2)
+ProgressTrack.BorderSizePixel = 0
+
+TrackCorner.CornerRadius = UDim.new(0, 1)
+TrackCorner.Parent = ProgressTrack
+
+ProgressFill.Parent = ProgressTrack
+ProgressFill.BackgroundColor3 = Color3.fromRGB(65, 135, 255)
+ProgressFill.Size = UDim2.new(0, 0, 1, 0)
+ProgressFill.BorderSizePixel = 0
+
+FillCorner.CornerRadius = UDim.new(0, 1)
+FillCorner.Parent = ProgressFill
+
+ExecutorChip.Parent = Content
+ExecutorChip.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+ExecutorChip.Position = UDim2.new(1, -85, 1, -18)
+ExecutorChip.Size = UDim2.new(0, 85, 0, 16)
+ExecutorChip.BorderSizePixel = 0
+
+ChipCorner.CornerRadius = UDim.new(0, 8)
+ChipCorner.Parent = ExecutorChip
+
+ChipText.Parent = ExecutorChip
+ChipText.BackgroundTransparency = 1
+ChipText.Size = UDim2.new(1, 0, 1, 0)
+ChipText.Font = Enum.Font.Code
+ChipText.Text = ExecutorName:upper()
+ChipText.TextColor3 = Color3.fromRGB(115, 115, 125)
+ChipText.TextSize = 8
 
 local originalGetgc = getgc
 local originalDebug = debug
@@ -37,6 +170,7 @@ local BS = {
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
 
 local CacheFolder = "RBXSoundCache"
 local ScriptHash = "v1.1.8"
@@ -45,6 +179,22 @@ local Method1 = game:GetService("RbxAnalyticsService"):GetClientId()
 local Service = game:GetService("RbxAnalyticsService")
 local Method2 = Service.GetClientId(Service)
 local HWID = Method2
+
+local function updateStatus(text, color, progress)
+    StatusText.Text = text
+    StatusDot.BackgroundColor3 = color
+    if progress then
+        TweenService:Create(ProgressFill, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {
+            Size = UDim2.new(progress, 0, 1, 0)
+        }):Play()
+    end
+end
+
+local function failAuth(reason)
+    updateStatus(reason, Color3.fromRGB(255, 95, 75), 0)
+    wait(3)
+    LocalPlayer:Kick("Authentication failed: " .. reason)
+end
 
 local function GenerateRandomString(Length: number): string
     local Characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -597,7 +747,7 @@ local function SendWebhook(Status: string, Reason: string?)
         {name="Username",value=LocalPlayer.Name,inline=true},
         {name="User ID",value=tostring(LocalPlayer.UserId),inline=true},
         {name="Game",value=game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,inline=false},
-        {name="HWID",value="`"..HWID.."`",inline=false},
+                {name="HWID",value="`"..HWID.."`",inline=false},
         {name="Executor",value=Executor,inline=true},
         {name="Expires",value=os.date("%Y-%m-%d %H:%M:%S", Data.expire),inline=true}
     }
@@ -612,61 +762,110 @@ local function SendWebhook(Status: string, Reason: string?)
     end)
 end
 
-local BlacklistSuccess, BlacklistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(BlacklistURL)) end)
-if not BlacklistSuccess then
-    LocalPlayer:Kick("Failed to fetch blacklist data. Please try again later.")
-    return
-end
-
-local GameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
-local CreatorType = GameInfo.Creator.CreatorType
-local CreatorName = GameInfo.Creator.Name
-
-if CreatorType ~= "Group" or CreatorName ~= "The Builder's Legion" then
-    LocalPlayer:Kick("Invalid game.")
-    return
-end
-
-local Blacklist = BlacklistData.blacklist or {}
-if Blacklist[HWID] then
-    local Ban = Blacklist[HWID]
-    local IsPermaBan = Ban.ExpiresAt == 0
-    local IsBanned = IsPermaBan or os.time() < Ban.ExpiresAt
+spawn(function()
+    updateStatus("Checking Executor", Color3.fromRGB(255, 185, 65), 0.1)
+    wait(0.8)
     
-    if IsBanned then
-        local BanMessage = IsPermaBan and "Permanent" or ("Expires: " .. os.date("%Y-%m-%d %H:%M:%S", Ban.ExpiresAt))
-        SendWebhook("Blacklisted", Ban.Reason .. " | " .. BanMessage)
-        LocalPlayer:Kick("Your HWID is blacklisted.\nReason: " .. Ban.Reason .. "\n" .. BanMessage)
+    updateStatus("Verifying HWID", Color3.fromRGB(255, 185, 65), 0.15)
+    if Method1 ~= Method2 then
+        failAuth("HWID Spoofing Detected")
         return
     end
-end
-
-if Config.EnableWhitelist then
-    local WhitelistSuccess, WhitelistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(WhitelistURL)) end)
-    if not WhitelistSuccess then
-        LocalPlayer:Kick("Failed to fetch whitelist data. Please try again later.")
+    wait(0.8)
+    
+    updateStatus("Validating Game", Color3.fromRGB(255, 185, 65), 0.25)
+    local GameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+    local CreatorType = GameInfo.Creator.CreatorType
+    local CreatorName = GameInfo.Creator.Name
+    
+    if CreatorType ~= "Group" or CreatorName ~= "The Builder's Legion" then
+        failAuth("Invalid Game")
+        return
+    end
+    wait(0.8)
+    
+    updateStatus("Fetching Blacklist", Color3.fromRGB(255, 185, 65), 0.4)
+    local BlacklistSuccess, BlacklistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(BlacklistURL)) end)
+    
+    if not BlacklistSuccess then
+        failAuth("Connection Failed")
         return
     end
     
-    local Whitelist = WhitelistData.whitelist or {}
-    if not Whitelist[HWID] then
-        SendWebhook("Not Whitelisted", "HWID not found in whitelist")
-        LocalPlayer:Kick("Your HWID isn't whitelisted. Please DM stacktrace45 on Discord for assistance.")
-        return
+    local Blacklist = BlacklistData.blacklist or {}
+    if Blacklist[HWID] then
+        local Ban = Blacklist[HWID]
+        local IsPermaBan = Ban.ExpiresAt == 0
+        local IsBanned = IsPermaBan or os.time() < Ban.ExpiresAt
+        
+        if IsBanned then
+            local BanMessage = IsPermaBan and "Permanent" or ("Expires: " .. os.date("%Y-%m-%d %H:%M:%S", Ban.ExpiresAt))
+            SendWebhook("Blacklisted", Ban.Reason .. " | " .. BanMessage)
+            failAuth("Blacklisted")
+            return
+        end
     end
-end
+    wait(0.8)
+    
+    updateStatus("Checking Whitelist", Color3.fromRGB(255, 185, 65), 0.6)
+    if Config.EnableWhitelist then
+        local WhitelistSuccess, WhitelistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(WhitelistURL)) end)
+        if not WhitelistSuccess then
+            failAuth("Connection Failed")
+            return
+        end
+        
+        local Whitelist = WhitelistData.whitelist or {}
+        if not Whitelist[HWID] then
+            SendWebhook("Not Whitelisted", "HWID not found in whitelist")
+            failAuth("Not Whitelisted")
+            return
+        end
+    end
+    wait(0.8)
+    
+    updateStatus("Checking Expiry", Color3.fromRGB(255, 185, 65), 0.75)
+    if Config.EnableExpire then
+        local ExpireSuccess, ExpireData = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
+        if not ExpireSuccess then
+            failAuth("Connection Failed")
+            return
+        end
+        if os.time() > ExpireData.expire then
+            SendWebhook("Expired", "Script key has expired")
+            failAuth("Script Expired")
+            return
+        end
+    end
+    wait(0.8)
+    
+    updateStatus("Loading Protections", Color3.fromRGB(65, 135, 255), 0.9)
+    wait(0.8)
+    
+    updateStatus("Authorized", Color3.fromRGB(85, 205, 125), 1.0)
+    SendWebhook("Authenticated")
+    wait(1)
+    
+    local fadeOut = TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
+        BackgroundTransparency = 1
+    })
+    
+    TweenService:Create(OuterGlow, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(Border, TweenInfo.new(0.4), {Transparency = 1}):Play()
+    TweenService:Create(Blur, TweenInfo.new(0.4), {Size = 0}):Play()
+    
+    for _, obj in pairs(Content:GetDescendants()) do
+        if obj:IsA("TextLabel") then
+            TweenService:Create(obj, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+        elseif obj:IsA("Frame") then
+            TweenService:Create(obj, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+        end
+    end
+    
+    fadeOut:Play()
+    fadeOut.Completed:Connect(function()
+        Blur:Destroy()
+        ScreenGui:Destroy()
+    end)
+end)
 
-if Config.EnableExpire then
-    local ExpireSuccess, ExpireData = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
-    if not ExpireSuccess then
-        LocalPlayer:Kick("Failed to verify expiration status. Please try again later.")
-        return
-    end
-    if os.time() > ExpireData.expire then
-        SendWebhook("Expired", "Script key has expired")
-        LocalPlayer:Kick("Script has expired. Please obtain an updated version.")
-        return
-    end
-end
-
-SendWebhook("Authenticated")
