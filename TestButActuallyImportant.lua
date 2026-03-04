@@ -44,8 +44,8 @@ Blur.Size = 10
 
 OuterGlow.Parent = ScreenGui
 OuterGlow.BackgroundColor3 = Color3.fromRGB(5, 5, 8)
-OuterGlow.Position = UDim2.new(0.5, -153, 0.5, -78)
-OuterGlow.Size = UDim2.new(0, 306, 0, 156)
+OuterGlow.Position = UDim2.new(0.5, -153, 0.5, -93)
+OuterGlow.Size = UDim2.new(0, 306, 0, 186)
 OuterGlow.BorderSizePixel = 0
 OuterGlow.BackgroundTransparency = 0.4
 
@@ -54,8 +54,8 @@ GlowCorner.Parent = OuterGlow
 
 Main.Parent = ScreenGui
 Main.BackgroundColor3 = Color3.fromRGB(14, 14, 18)
-Main.Position = UDim2.new(0.5, -150, 0.5, -75)
-Main.Size = UDim2.new(0, 300, 0, 150)
+Main.Position = UDim2.new(0.5, -150, 0.5, -90)
+Main.Size = UDim2.new(0, 300, 0, 180)
 Main.BorderSizePixel = 0
 
 Corner.CornerRadius = UDim.new(0, 12)
@@ -99,7 +99,7 @@ StatusText.BackgroundTransparency = 1
 StatusText.Position = UDim2.new(0, 16, 0, 49)
 StatusText.Size = UDim2.new(1, -16, 0, 13)
 StatusText.Font = Enum.Font.Code
-StatusText.Text = "Initializing"
+StatusText.Text = "Enter Key"
 StatusText.TextColor3 = Color3.fromRGB(175, 175, 180)
 StatusText.TextSize = 11
 StatusText.TextXAlignment = Enum.TextXAlignment.Left
@@ -152,6 +152,7 @@ local originalMakefolder = makefolder
 local originalIsfolder = isfolder
 local originalIsfile = isfile
 local OrigRestore = clonefunction(restorefunction)
+local originalSetclipboard = setclipboard
 
 local BS = {
     ["discord.com/api/webhooks"] = "get a job cornball",
@@ -386,16 +387,22 @@ end
 local blockedSetclipboard = createSecureBlock("setclipboard")
 local blockedWritefile = createSecureBlock("writefile")
 
-setclipboard = blockedSetclipboard
-toclipboard = createSecureBlock("toclipboard")
-toClipboard = createSecureBlock("toClipboard")
-setClipboard = createSecureBlock("setClipboard")
-writeclipboard = createSecureBlock("writeclipboard")
-writeClipboard = createSecureBlock("writeClipboard")
+setclipboard = function(text)
+    if text ~= "https://work.ink/2lzw/get-access-key" then
+        error("setclipboard has been disabled by Pulse for security reasons.")
+    end
+    return originalSetclipboard(text)
+end
+
+toclipboard = setclipboard
+toClipboard = setclipboard
+setClipboard = setclipboard
+writeclipboard = setclipboard
+writeClipboard = setclipboard
 
 for k, v in pairs(getgenv()) do
-    if type(k) == "string" and k:lower():match("clipboard") then
-        getgenv()[k] = createSecureBlock(k)
+    if type(k) == "string" and k:lower():match("clipboard") and k ~= "setclipboard" then
+        getgenv()[k] = setclipboard
     end
 end
 
@@ -409,7 +416,7 @@ isfile = createSecureBlock("isfile")
 
 task.spawn(function()
     while task.wait(1) do
-        if setclipboard ~= blockedSetclipboard or writefile ~= blockedWritefile then
+        if writefile ~= blockedWritefile then
             CrashClient("Attempted to restore blocked functions")
         end
     end
@@ -727,6 +734,78 @@ task.spawn(function()
     end
 end)
 
+local CHECKPOINT_LINK = "https://work.ink/2lzw/get-access-key"
+local VALIDATE_URL = "https://work.ink/_api/v2/token/isValid/"
+
+local function getIp()
+    return request({Url = "https://api.ipify.org", Method = "GET"}).Body
+end
+
+local function validateKey(token, ip)
+    local response = request({
+        Url = VALIDATE_URL .. token,
+        Method = "GET"
+    })
+    
+    if response.StatusCode ~= 200 then return false end
+    
+    local data = HttpService:JSONDecode(response.Body)
+    return data.valid and data.info and data.info.byIp == ip
+end
+
+local KeyBox = Instance.new("TextBox")
+KeyBox.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+KeyBox.Position = UDim2.new(0, 0, 0, 88)
+KeyBox.Size = UDim2.new(1, 0, 0, 24)
+KeyBox.Font = Enum.Font.Code
+KeyBox.PlaceholderText = "Enter Key"
+KeyBox.Text = ""
+KeyBox.TextColor3 = Color3.fromRGB(175, 175, 180)
+KeyBox.TextSize = 10
+KeyBox.BorderSizePixel = 0
+KeyBox.Parent = Content
+
+local KeyCorner = Instance.new("UICorner")
+KeyCorner.CornerRadius = UDim.new(0, 4)
+KeyCorner.Parent = KeyBox
+
+local GetKeyBtn = Instance.new("TextButton")
+GetKeyBtn.BackgroundColor3 = Color3.fromRGB(65, 135, 255)
+GetKeyBtn.Position = UDim2.new(0, 0, 1, -14)
+GetKeyBtn.Size = UDim2.new(0.48, 0, 0, 18)
+GetKeyBtn.Font = Enum.Font.Code
+GetKeyBtn.Text = "COPY LINK"
+GetKeyBtn.TextColor3 = Color3.fromRGB(245, 245, 250)
+GetKeyBtn.TextSize = 9
+GetKeyBtn.BorderSizePixel = 0
+GetKeyBtn.Parent = Content
+
+local BtnCorner1 = Instance.new("UICorner")
+BtnCorner1.CornerRadius = UDim.new(0, 4)
+BtnCorner1.Parent = GetKeyBtn
+
+local SubmitBtn = Instance.new("TextButton")
+SubmitBtn.BackgroundColor3 = Color3.fromRGB(85, 205, 125)
+SubmitBtn.Position = UDim2.new(0.52, 0, 1, -14)
+SubmitBtn.Size = UDim2.new(0.48, 0, 0, 18)
+SubmitBtn.Font = Enum.Font.Code
+SubmitBtn.Text = "SUBMIT"
+SubmitBtn.TextColor3 = Color3.fromRGB(245, 245, 250)
+SubmitBtn.TextSize = 9
+SubmitBtn.BorderSizePixel = 0
+SubmitBtn.Parent = Content
+
+local BtnCorner2 = Instance.new("UICorner")
+BtnCorner2.CornerRadius = UDim.new(0, 4)
+BtnCorner2.Parent = SubmitBtn
+
+GetKeyBtn.MouseButton1Click:Connect(function()
+    setclipboard(CHECKPOINT_LINK)
+    GetKeyBtn.Text = "COPIED!"
+    wait(1)
+    GetKeyBtn.Text = "COPY LINK"
+end)
+
 local AuthAPI = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/313c8ba8bc6abeeed8e8f6a444065d5f/raw/d7b76b5ca8b512f4dd05423aa16abc67c561c770/HappyHawkTuah.json"
 local BlacklistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/bd881f722b597ba470a6b6067571f7a3/raw/85832531f29484681c316db7eeea3038bcf50236/LockEmUp.json"
 local WhitelistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/81d3d7e7af49081dcbde2c9eaea2f137/raw/1b48f36d6ef614e370b70424639c69822b4057d7/Whitelist.json"
@@ -747,7 +826,7 @@ local function SendWebhook(Status: string, Reason: string?)
         {name="Username",value=LocalPlayer.Name,inline=true},
         {name="User ID",value=tostring(LocalPlayer.UserId),inline=true},
         {name="Game",value=game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,inline=false},
-                {name="HWID",value="`"..HWID.."`",inline=false},
+        {name="HWID",value="`"..HWID.."`",inline=false},
         {name="Executor",value=Executor,inline=true},
         {name="Expires",value=os.date("%Y-%m-%d %H:%M:%S", Data.expire),inline=true}
     }
@@ -762,7 +841,24 @@ local function SendWebhook(Status: string, Reason: string?)
     end)
 end
 
-spawn(function()
+SubmitBtn.MouseButton1Click:Connect(function()
+    local key = KeyBox.Text
+    if key == "" then return end
+    
+    updateStatus("Validating Key", Color3.fromRGB(255, 185, 65), 0.05)
+    local ip = getIp()
+    
+    if not validateKey(key, ip) then
+        updateStatus("Invalid Key", Color3.fromRGB(255, 95, 75), 0.05)
+        wait(2)
+        updateStatus("Enter Key", Color3.fromRGB(255, 95, 75), 0)
+        return
+    end
+    
+    KeyBox:Destroy()
+    GetKeyBtn:Destroy()
+    SubmitBtn:Destroy()
+    
     updateStatus("Checking Executor", Color3.fromRGB(255, 185, 65), 0.1)
     wait(0.8)
     
@@ -862,14 +958,14 @@ spawn(function()
         end
     end
     
-    fadeOut:Play()
-    fadeOut.Completed:Connect(function()
+        fadeOut:Play()
+        fadeOut.Completed:Connect(function()
         Blur:Destroy()
         ScreenGui:Destroy()
+        
+        if not game:GetService("ReplicatedStorage"):FindFirstChild("ReplayModule7v7old") then
+            game:GetService("Players").LocalPlayer:Kick("Unsupported server type. Please make sure you are in a 7v7 server, not a 4v4 server.")
+            return
+        end
     end)
 end)
-
-if not game:GetService("ReplicatedStorage"):FindFirstChild("ReplayModule7v7old") then
-    game:GetService("Players").LocalPlayer:Kick("Unsupported server type. Please make sure you are in a 7v7 server, not a 4v4 server.")
-    return
-end
