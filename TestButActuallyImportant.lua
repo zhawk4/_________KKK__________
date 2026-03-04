@@ -954,6 +954,7 @@ SubmitBtn.MouseButton1Click:Connect(function()
     end
     
     local AuthKey = "Auth_" .. math.random(100000, 999999) .. "_" .. math.random(100000, 999999)
+getgenv().AuthKeyName = AuthKey
 
     fadeOut:Play()
     fadeOut.Completed:Connect(function()
@@ -965,9 +966,8 @@ SubmitBtn.MouseButton1Click:Connect(function()
             return
         end
         
-        getgenv()[AuthKey] = true
+        getgenv()[getgenv().AuthKeyName] = true
     end)
 end)
 
-repeat task.wait() until getgenv()[AuthKey]
-
+repeat task.wait() until getgenv()[getgenv().AuthKeyName]
