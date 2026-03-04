@@ -384,25 +384,21 @@ local function createSecureBlock(funcName: string)
     end
 end
 
-local blockedSetclipboard = createSecureBlock("setclipboard")
 local blockedWritefile = createSecureBlock("writefile")
 
-setclipboard = function(text)
-    if text ~= "https://work.ink/2lzw/get-access-key" then
-        error("setclipboard has been disabled by Pulse for security reasons.")
-    end
-    return originalSetclipboard(text)
-end
+local genv = getgenv()
+local allowedLink = "https://work.ink/2lzw/get-access-key"
 
-toclipboard = setclipboard
-toClipboard = setclipboard
-setClipboard = setclipboard
-writeclipboard = setclipboard
-writeClipboard = setclipboard
-
-for k, v in pairs(getgenv()) do
-    if type(k) == "string" and k:lower():match("clipboard") and k ~= "setclipboard" then
-        getgenv()[k] = setclipboard
+for name, value in pairs(genv) do
+    if name:lower():find("clip") and type(value) == "function" then
+        print("Found clipboard function:", name)
+        local original = value
+        genv[name] = function(text: string)
+            if text ~= allowedLink then
+                error("Clipboard has been disabled by LOOEJ for security reasons.")
+            end
+            return original(text)
+        end
     end
 end
 
