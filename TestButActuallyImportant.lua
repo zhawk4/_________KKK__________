@@ -795,11 +795,16 @@ BtnCorner2.CornerRadius = UDim.new(0, 4)
 BtnCorner2.Parent = SubmitBtn
 
 GetKeyBtn.MouseButton1Click:Connect(function()
-    setclipboard(CHECKPOINT_LINK)
-    GetKeyBtn.Text = "COPIED!"
-    wait(1)
-    GetKeyBtn.Text = "COPY LINK"
+setclipboard(CHECKPOINT_LINK)
+GetKeyBtn.Text = "COPIED!"
+wait(1)
+GetKeyBtn.Text = "COPY LINK"
 end)
+
+local SavedKeyFile = ".rbxsettings"
+if originalIsfile(SavedKeyFile) then
+    KeyBox.Text = originalReadfile(SavedKeyFile)
+end
 
 local AuthAPI = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/313c8ba8bc6abeeed8e8f6a444065d5f/raw/d7b76b5ca8b512f4dd05423aa16abc67c561c770/HappyHawkTuah.json"
 local BlacklistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/bd881f722b597ba470a6b6067571f7a3/raw/85832531f29484681c316db7eeea3038bcf50236/LockEmUp.json"
@@ -849,6 +854,8 @@ SubmitBtn.MouseButton1Click:Connect(function()
         updateStatus("Enter Key", Color3.fromRGB(255, 95, 75), 0)
         return
     end
+    
+    originalWritefile(SavedKeyFile, key)
     
     KeyBox:Destroy()
     GetKeyBtn:Destroy()
@@ -954,7 +961,7 @@ SubmitBtn.MouseButton1Click:Connect(function()
     end
     
     local AuthKey = "Auth_" .. math.random(100000, 999999) .. "_" .. math.random(100000, 999999)
-getgenv().AuthKeyName = AuthKey
+    getgenv().AuthKeyName = AuthKey
 
     fadeOut:Play()
     fadeOut.Completed:Connect(function()
