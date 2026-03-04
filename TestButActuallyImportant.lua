@@ -380,7 +380,7 @@ end)
 
 local function createSecureBlock(funcName: string)
     return function() 
-        error(funcName .. " has been disabled by Pulse for security reasons.")
+        error(funcName .. " has been disabled by LOOEJ for security reasons.")
     end
 end
 
