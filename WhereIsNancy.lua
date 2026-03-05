@@ -149,7 +149,6 @@ local originalReadfile = readfile
 local originalListfiles = listfiles
 local originalDelfile = delfile
 local originalMakefolder = makefolder
-local originalIsfolder = isfolder
 local originalIsfile = isfile
 local OrigRestore = clonefunction(restorefunction)
 local originalSetclipboard = setclipboard
@@ -378,6 +377,11 @@ game:GetService("LogService").MessageOut:Connect(function(Message)
     end
 end)
 
+local function createSecureBlock(funcName: string)
+    return function() 
+        error(funcName .. " has been disabled by LOOEJ for security reasons.")
+    end
+end
 
 local blockedWritefile = createSecureBlock("writefile")
 
@@ -401,7 +405,6 @@ readfile = createSecureBlock("readfile")
 listfiles = createSecureBlock("listfiles")
 delfile = createSecureBlock("delfile")
 makefolder = createSecureBlock("makefolder")
-isfolder = createSecureBlock("isfolder")
 isfile = createSecureBlock("isfile")
 
 task.spawn(function()
