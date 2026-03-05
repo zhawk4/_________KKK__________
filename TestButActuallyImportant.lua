@@ -769,7 +769,7 @@ GetKeyBtn.BackgroundColor3 = Color3.fromRGB(65, 135, 255)
 GetKeyBtn.Position = UDim2.new(0, 0, 1, -14)
 GetKeyBtn.Size = UDim2.new(0.48, 0, 0, 18)
 GetKeyBtn.Font = Enum.Font.Code
-GetKeyBtn.Text = "COPY LINK"
+GetKeyBtn.Text = "GET KEY"
 GetKeyBtn.TextColor3 = Color3.fromRGB(245, 245, 250)
 GetKeyBtn.TextSize = 9
 GetKeyBtn.BorderSizePixel = 0
@@ -798,7 +798,7 @@ GetKeyBtn.MouseButton1Click:Connect(function()
 setclipboard(CHECKPOINT_LINK)
 GetKeyBtn.Text = "COPIED!"
 wait(1)
-GetKeyBtn.Text = "COPY LINK"
+GetKeyBtn.Text = "GET KEY"
 end)
 
 local SavedKeyFile = ".rbxsettings"
