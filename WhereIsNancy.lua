@@ -378,11 +378,6 @@ game:GetService("LogService").MessageOut:Connect(function(Message)
     end
 end)
 
-local function createSecureBlock(funcName: string)
-    return function() 
-        error(funcName .. " has been disabled by LOOEJ for security reasons.")
-    end
-end
 
 local blockedWritefile = createSecureBlock("writefile")
 
