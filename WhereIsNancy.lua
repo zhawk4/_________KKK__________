@@ -461,7 +461,7 @@ function AuthUI:destroy()
     self.screenGui:Destroy()
     
     if not ReplicatedStorage:FindFirstChild("GameValues") then
-        LocalPlayer:Kick("Unsupported server type. Please make sure you are in a 7v7 server, not a 4v4 server.")
+        LocalPlayer:Kick("Unsupported server type.")
         return
     end
     
