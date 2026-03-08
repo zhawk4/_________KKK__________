@@ -84,9 +84,10 @@ if not SkipChecks then
         local OriginalFunction = RequestFunction
         local OriginalRequest = request
         local Metatable = getrawmetatable(game)
+        local wasReadonly = isreadonly(Metatable)
         setreadonly(Metatable, false)
         local OriginalNamecall = Metatable.__namecall
-        setreadonly(Metatable, true)
+        setreadonly(Metatable, wasReadonly)
         
         task.wait(2)
 
@@ -105,7 +106,8 @@ if not SkipChecks then
             end
 
             local CurrentMetatable = getrawmetatable(game)
-            if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) then
+            local currentNamecall = CurrentMetatable.__namecall
+            if currentNamecall ~= OriginalNamecall and not isexecutorclosure(currentNamecall) and not isnewcclosure(currentNamecall) then
                 CrashClient("HTTP request interception detected")
             end
         end
