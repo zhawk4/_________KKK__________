@@ -1,3 +1,4 @@
+-- get exec name
 local ExecutorName = identifyexecutor() or "Unknown"
 local SkipChecks = ExecutorName == "Xeno" or ExecutorName == "Solara"
 
@@ -67,75 +68,64 @@ local function CrashClient(DetectionReason)
     end
 end
 
+-- Check HWID spoofing
 if Method1 ~= Method2 then
     CrashClient("HWID spoofing detected")
     return
 end
 
 if not SkipChecks then
+    -- check if request function is already hooked
     if (syn and syn.request or http_request or request) and pcall(function() return isexecutorclosure end) and not isexecutorclosure((syn and syn.request or http_request or request)) then
         CrashClient("HTTP request interception detected")
     end
 
-    local spyPatterns = {
-        "discord%.com/api/webhooks",
-        "webhook",
-        "HttpSpy",
-        "RequestLogger", 
-        "ToopSpy",
-        "HTTP SPY",
-        "REQUEST SPY",
-        "WEBHOOK SPY",
-        "Method:",
-        "URL:",
-        "Body:",
-        "Headers:",
-        "Response:",
-        "Status Code:"
-    }
-
-    local mt = getrawmetatable(game)
-    setreadonly(mt, false)
-
-    local originalIndex = mt.__index
-    mt.__index = newcclosure(function(self, key)
-        local result = originalIndex(self, key)
+    task.spawn(function()
+        if not pcall(function() return isexecutorclosure end) then return end
         
-        if key == "Text" and type(result) == "string" then
-            for _, pattern in pairs(spyPatterns) do
-                if result:match(pattern) then
-                    CrashClient("Spy text detected in GUI: " .. pattern)
-                end
+        local RequestFunction = (syn or http).request
+        local OriginalFunction = RequestFunction
+        local OriginalRequest = request
+        local Metatable = getrawmetatable(game)
+        setreadonly(Metatable, false)
+        local OriginalNamecall = Metatable.__namecall
+        setreadonly(Metatable, true)
+        
+        task.wait(2)
+
+        while task.wait(0.5) do
+            -- check for known spy tools
+            if getgenv().EmplicsWebhookSpy or getgenv().discordwebhookdetector or getgenv().pastebindetector or getgenv().githubdetector or getgenv().anylink or getgenv().kickbypass or getgenv().StringDumper then
+                CrashClient("Unauthorized tool detected")
+            end
+
+            -- verify request function hasn't been hooked
+            local CurrentFunction = (syn or http).request
+            if CurrentFunction ~= OriginalFunction or not isexecutorclosure(CurrentFunction) then
+                CrashClient("HTTP request interception detected")
+            end
+            
+            if request and (request ~= OriginalRequest or not isexecutorclosure(request)) then
+                CrashClient("HTTP request interception detected")
+            end
+
+            -- check if namecall was hooked
+            local CurrentMetatable = getrawmetatable(game)
+            if CurrentMetatable.__namecall ~= OriginalNamecall and not isexecutorclosure(CurrentMetatable.__namecall) then
+                CrashClient("HTTP request interception detected")
             end
         end
-        
-        return result
     end)
-
-    local originalNewindex = mt.__newindex
-    mt.__newindex = newcclosure(function(self, key, value)
-        if key == "Text" and type(value) == "string" then
-            for _, pattern in pairs(spyPatterns) do
-                if value:match(pattern) then
-                    CrashClient("Spy text being set in GUI: " .. pattern)
-                end
-            end
-        end
-        
-        return originalNewindex(self, key, value)
-    end)
-
-    setreadonly(mt, true)
     
+    -- monitor console for webhook URLs
     game:GetService("LogService").MessageOut:Connect(function(Message)
-        for _, pattern in pairs(spyPatterns) do
-            if Message:match(pattern) then
-                CrashClient("Spy pattern in console: " .. pattern)
-            end
+        if Message:match("discord%.com/api/webhooks") or Message:match("webhook") then
+            CrashClient("Unauthorized webhook activity detected")
         end
     end)
 end
 
+-- auth
 local AuthAPI = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/313c8ba8bc6abeeed8e8f6a444065d5f/raw/d7b76b5ca8b512f4dd05423aa16abc67c561c770/HappyHawkTuah.json"
 local BlacklistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/bd881f722b597ba470a6b6067571f7a3/raw/85832531f29484681c316db7eeea3038bcf50236/LockEmUp.json"
 local WhitelistURL = "https://gist.githubusercontent.com/8931247412412421245524343255485937065/81d3d7e7af49081dcbde2c9eaea2f137/raw/ae43946ce0eedb33325d3e31754ede7f80d45579/Whitelist.json"
@@ -187,18 +177,21 @@ local function SendWebhook(Status, Reason)
     end)
 end
 
+-- Check blacklist
 local BlacklistSuccess, BlacklistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(BlacklistURL)) end)
 if not BlacklistSuccess then
     LocalPlayer:Kick("Failed to fetch blacklist data.")
     return
 end
 
+-- Verify game
 local GameInfo = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
 if GameInfo.Creator.CreatorType ~= "Group" or GameInfo.Creator.Name ~= "Ma1e Group" then
     LocalPlayer:Kick("Invalid game.")
     return
 end
 
+-- Check blacklist
 local Blacklist = BlacklistData.blacklist or {}
 if Blacklist[HWID] then
     local Ban = Blacklist[HWID]
@@ -213,6 +206,7 @@ if Blacklist[HWID] then
     end
 end
 
+-- Check whitelist
 if Config.EnableWhitelist then
     local WhitelistSuccess, WhitelistData = pcall(function() return HttpService:JSONDecode(game:HttpGet(WhitelistURL)) end)
     if WhitelistSuccess then
@@ -225,6 +219,7 @@ if Config.EnableWhitelist then
     end
 end
 
+-- Check expiration
 if Config.EnableExpire then
     local ExpireSuccess, ExpireData = pcall(function() return HttpService:JSONDecode(game:HttpGet(AuthAPI)) end)
     if ExpireSuccess and os.time() > ExpireData.expire then
@@ -235,6 +230,4 @@ if Config.EnableExpire then
 end
 
 SendWebhook("Authenticated")
-print("Auth successful")
-
-getgenv().AuthPassed = true
+print("Auth successful????????????????????????????????????")
